@@ -1,12 +1,13 @@
 ## fastapi-redis-cache <!-- omit in toc -->
 
-[![PyPI version](https://badge.fury.io/py/fastapi-redis-cache.svg)](https://badge.fury.io/py/fastapi-redis-cache)
+<!-- [![PyPI version](https://badge.fury.io/py/fastapi-redis-cache.svg)](https://badge.fury.io/py/fastapi-redis-cache)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-redis-cache?color=%234DC71F)
 ![PyPI - License](https://img.shields.io/pypi/l/fastapi-redis-cache?color=%25234DC71F)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fastapi-redis-cache)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ec0b1d7afb21bd8c23dc/maintainability)](https://codeclimate.com/github/a-luna/fastapi-redis-cache/maintainability)
-[![codecov](https://codecov.io/gh/a-luna/fastapi-redis-cache/branch/main/graph/badge.svg?token=dUaILJcgWY)](https://codecov.io/gh/a-luna/fastapi-redis-cache)
+[![codecov](https://codecov.io/gh/a-luna/fastapi-redis-cache/branch/main/graph/badge.svg?token=dUaILJcgWY)](https://codecov.io/gh/a-luna/fastapi-redis-cache) -->
 
+- [Important](#important)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -15,8 +16,22 @@
     - [Response Headers](#response-headers)
     - [Pre-defined Lifetimes](#pre-defined-lifetimes)
   - [Cache Keys](#cache-keys)
-  - [Cache Keys Pt 2.](#cache-keys-pt-2)
+  - [Cache Keys Pt 2](#cache-keys-pt-2)
 - [Questions/Contributions](#questionscontributions)
+
+## Important
+
+This project is a fork of
+[fastapi-redis-cache](https://github.com/a-luna/fastapi-redis-cache) which seems
+to no longer be maintained.
+
+Right now the code is exactly the same as the original project, but I have
+updated the Package management system to use `Poetry`, the dependencies and the
+CI/CD pipeline. I'll also merge any useful PR's that are open in the original
+project.
+
+Currently, even though the tests all pass there is no guarantee that the
+project works as expected until I have tested it in a real project.
 
 ## Features
 
@@ -240,7 +255,7 @@ INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
 
 Now, every request for the same `id` generates the same key value (`myapi-cache:api.get_user(id=1)`). As expected, the first request adds the key/value pair to the cache, and each subsequent request retrieves the value from the cache based on the key.
 
-### Cache Keys Pt 2.
+### Cache Keys Pt 2
 
 What about this situation? You create a custom dependency for your API that performs input validation, but you can't ignore it because _**it does**_ have an effect on the response data. There's a simple solution for that, too.
 
