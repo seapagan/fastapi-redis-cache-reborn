@@ -1,0 +1,18 @@
+name: Linting
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  ruff:
+    if: false # disable this job for now until the code is ready for linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linting
+        uses: chartboost/ruff-action@v1
+        with:
+          args: check
+      - name: Check Formatting
+        uses: chartboost/ruff-action@v1
+        with:
+          args: format --check
