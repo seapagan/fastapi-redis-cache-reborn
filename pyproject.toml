@@ -5,13 +5,13 @@ description = "A simple and robust caching solution for FastAPI endpoints, fuele
 authors = ["Grant Ramsay <seapagan@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+packages = [{ include = "fastapi_redis_cache", from = "." }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 pydantic = "^2.6.4"
 redis = "^5.0.3"
 fastapi = { extras = ["all"], version = "^0.110.0" }
-
 
 [tool.poetry.group.dev.dependencies]
 requests = "^2.31.0"
@@ -169,6 +169,6 @@ mock_use_standalone_module = true
 
 [tool.coverage.run]
 # source = []
-source = ["src"]
+source = ["fastapi_redis_cache"]
 omit = ["*/tests/*"]
 # concurrency = ["thread", "greenlet"]
