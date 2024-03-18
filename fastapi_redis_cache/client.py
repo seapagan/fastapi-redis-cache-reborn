@@ -76,23 +76,40 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         self._connect()
 
     def _connect(self):
-        self.log(RedisEvent.CONNECT_BEGIN, msg="Attempting to connect to Redis server...")
+        self.log(
+            RedisEvent.CONNECT_BEGIN,
+            msg="Attempting to connect to Redis server...",
+        )
         self.status, self.redis = redis_connect(self.host_url)
         if self.status == RedisStatus.CONNECTED:
-            self.log(RedisEvent.CONNECT_SUCCESS, msg="Redis client is connected to server.")
+            self.log(
+                RedisEvent.CONNECT_SUCCESS,
+                msg="Redis client is connected to server.",
+            )
         if self.status == RedisStatus.AUTH_ERROR:  # pragma: no cover
-            self.log(RedisEvent.CONNECT_FAIL, msg="Unable to connect to redis server due to authentication error.")
+            self.log(
+                RedisEvent.CONNECT_FAIL,
+                msg="Unable to connect to redis server due to authentication error.",
+            )
         if self.status == RedisStatus.CONN_ERROR:  # pragma: no cover
-            self.log(RedisEvent.CONNECT_FAIL, msg="Redis server did not respond to PING message.")
+            self.log(
+                RedisEvent.CONNECT_FAIL,
+                msg="Redis server did not respond to PING message.",
+            )
 
     def request_is_not_cacheable(self, request: Request) -> bool:
         return request and (
             request.method not in ALLOWED_HTTP_TYPES
-            or any(directive in request.headers.get("Cache-Control", "") for directive in ["no-store", "no-cache"])
+            or any(
+                directive in request.headers.get("Cache-Control", "")
+                for directive in ["no-store", "no-cache"]
+            )
         )
 
     def get_cache_key(self, func: Callable, *args: List, **kwargs: Dict) -> str:
-        return get_cache_key(self.prefix, self.ignore_arg_types, func, *args, **kwargs)
+        return get_cache_key(
+            self.prefix, self.ignore_arg_types, func, *args, **kwargs
+        )
 
     def check_cache(self, key: str) -> Tuple[int, str]:
         pipe = self.redis.pipeline()
@@ -101,10 +118,16 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             self.log(RedisEvent.KEY_FOUND_IN_CACHE, key=key)
         return (ttl, in_cache)
 
-    def requested_resource_not_modified(self, request: Request, cached_data: str) -> bool:
+    def requested_resource_not_modified(
+        self, request: Request, cached_data: str
+    ) -> bool:
         if not request or "If-None-Match" not in request.headers:
             return False
-        check_etags = [etag.strip() for etag in request.headers["If-None-Match"].split(",") if etag]
+        check_etags = [
+            etag.strip()
+            for etag in request.headers["If-None-Match"].split(",")
+            if etag
+        ]
         if len(check_etags) == 1 and check_etags[0] == "*":
             return True
         return self.get_etag(cached_data) in check_etags
@@ -125,7 +148,11 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         return cached
 
     def set_response_headers(
-        self, response: Response, cache_hit: bool, response_data: Dict = None, ttl: int = None
+        self,
+        response: Response,
+        cache_hit: bool,
+        response_data: Dict = None,
+        ttl: int = None,
     ) -> None:
         response.headers[self.response_header] = "Hit" if cache_hit else "Miss"
         expires_at = datetime.utcnow() + timedelta(seconds=ttl)
@@ -135,7 +162,13 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         if "last_modified" in response_data:  # pragma: no cover
             response.headers["Last-Modified"] = response_data["last_modified"]
 
-    def log(self, event: RedisEvent, msg: Optional[str] = None, key: Optional[str] = None, value: Optional[str] = None):
+    def log(
+        self,
+        event: RedisEvent,
+        msg: Optional[str] = None,
+        key: Optional[str] = None,
+        value: Optional[str] = None,
+    ):
         """Log `RedisEvent` using the configured `Logger` object"""
         message = f" {self.get_log_time()} | {event.name}"
         if msg:

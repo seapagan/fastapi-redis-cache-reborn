@@ -1,4 +1,5 @@
 """cache.py"""
+
 from collections import OrderedDict
 from inspect import signature, Signature
 from typing import Any, Callable, Dict, List
@@ -10,7 +11,13 @@ from fastapi_redis_cache.types import ArgType, SigParameters
 ALWAYS_IGNORE_ARG_TYPES = [Response, Request]
 
 
-def get_cache_key(prefix: str, ignore_arg_types: List[ArgType], func: Callable, *args: List, **kwargs: Dict) -> str:
+def get_cache_key(
+    prefix: str,
+    ignore_arg_types: List[ArgType],
+    func: Callable,
+    *args: List,
+    **kwargs: Dict,
+) -> str:
     """Ganerate a string that uniquely identifies the function and values of all arguments.
 
     Args:
@@ -40,15 +47,23 @@ def get_cache_key(prefix: str, ignore_arg_types: List[ArgType], func: Callable, 
     return f"{prefix}{func.__module__}.{func.__name__}({args_str})"
 
 
-def get_func_args(sig: Signature, *args: List, **kwargs: Dict) -> "OrderedDict[str, Any]":
+def get_func_args(
+    sig: Signature, *args: List, **kwargs: Dict
+) -> "OrderedDict[str, Any]":
     """Return a dict object containing the name and value of all function arguments."""
     func_args = sig.bind(*args, **kwargs)
     func_args.apply_defaults()
     return func_args.arguments
 
 
-def get_args_str(sig_params: SigParameters, func_args: "OrderedDict[str, Any]", ignore_arg_types: List[ArgType]) -> str:
+def get_args_str(
+    sig_params: SigParameters,
+    func_args: "OrderedDict[str, Any]",
+    ignore_arg_types: List[ArgType],
+) -> str:
     """Return a string with the name and value of all args whose type is not included in `ignore_arg_types`"""
     return ",".join(
-        f"{arg}={val}" for arg, val in func_args.items() if sig_params[arg].annotation not in ignore_arg_types
+        f"{arg}={val}"
+        for arg, val in func_args.items()
+        if sig_params[arg].annotation not in ignore_arg_types
     )

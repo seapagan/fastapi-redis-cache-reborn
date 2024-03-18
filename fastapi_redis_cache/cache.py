@@ -1,4 +1,5 @@
 """cache.py"""
+
 import asyncio
 from datetime import timedelta
 from functools import partial, update_wrapper, wraps
@@ -40,14 +41,21 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
             if create_response_directly:
                 response = Response()
             redis_cache = FastApiRedisCache()
-            if redis_cache.not_connected or redis_cache.request_is_not_cacheable(request):
+            if (
+                redis_cache.not_connected
+                or redis_cache.request_is_not_cacheable(request)
+            ):
                 # if the redis client is not connected or request is not cacheable, no caching behavior is performed.
                 return await get_api_response_async(func, *args, **kwargs)
             key = redis_cache.get_cache_key(func, *args, **kwargs)
             ttl, in_cache = redis_cache.check_cache(key)
             if in_cache:
-                redis_cache.set_response_headers(response, True, deserialize_json(in_cache), ttl)
-                if redis_cache.requested_resource_not_modified(request, in_cache):
+                redis_cache.set_response_headers(
+                    response, True, deserialize_json(in_cache), ttl
+                )
+                if redis_cache.requested_resource_not_modified(
+                    request, in_cache
+                ):
                     response.status_code = int(HTTPStatus.NOT_MODIFIED)
                     return (
                         Response(
@@ -60,7 +68,11 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
                         else response
                     )
                 return (
-                    Response(content=in_cache, media_type="application/json", headers=response.headers)
+                    Response(
+                        content=in_cache,
+                        media_type="application/json",
+                        headers=response.headers,
+                    )
                     if create_response_directly
                     else deserialize_json(in_cache)
                 )
@@ -68,10 +80,17 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
             ttl = calculate_ttl(expire)
             cached = redis_cache.add_to_cache(key, response_data, ttl)
             if cached:
-                redis_cache.set_response_headers(response, cache_hit=False, response_data=response_data, ttl=ttl)
+                redis_cache.set_response_headers(
+                    response,
+                    cache_hit=False,
+                    response_data=response_data,
+                    ttl=ttl,
+                )
                 return (
                     Response(
-                        content=serialize_json(response_data), media_type="application/json", headers=response.headers
+                        content=serialize_json(response_data),
+                        media_type="application/json",
+                        headers=response.headers,
                     )
                     if create_response_directly
                     else response_data
@@ -85,11 +104,15 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
 
 async def get_api_response_async(func, *args, **kwargs):
     """Helper function that allows decorator to work with both async and non-async functions."""
-    return await func(*args, **kwargs) if asyncio.iscoroutinefunction(func) else func(*args, **kwargs)
+    return (
+        await func(*args, **kwargs)
+        if asyncio.iscoroutinefunction(func)
+        else func(*args, **kwargs)
+    )
 
 
 def calculate_ttl(expire: Union[int, timedelta]) -> int:
-    """"Converts expire time to total seconds and ensures that ttl is capped at one year."""
+    """ "Converts expire time to total seconds and ensures that ttl is capped at one year."""
     if isinstance(expire, timedelta):
         expire = int(expire.total_seconds())
     return min(expire, ONE_YEAR_IN_SECONDS)

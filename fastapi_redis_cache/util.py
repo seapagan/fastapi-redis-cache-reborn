@@ -23,7 +23,10 @@ SERIALIZE_OBJ_MAP = {
 class BetterJsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
-            return {"val": obj.strftime(DATETIME_AWARE), "_spec_type": str(datetime)}
+            return {
+                "val": obj.strftime(DATETIME_AWARE),
+                "_spec_type": str(datetime),
+            }
         elif isinstance(obj, date):
             return {"val": obj.strftime(DATE_ONLY), "_spec_type": str(date)}
         elif isinstance(obj, Decimal):
@@ -37,7 +40,9 @@ def object_hook(obj):
         return obj
     _spec_type = obj["_spec_type"]
     if _spec_type not in SERIALIZE_OBJ_MAP:  # pragma: no cover
-        raise TypeError(f'"{obj["val"]}" (type: {_spec_type}) is not JSON serializable')
+        raise TypeError(
+            f'"{obj["val"]}" (type: {_spec_type}) is not JSON serializable'
+        )
     return SERIALIZE_OBJ_MAP[_spec_type](obj["val"])
 
 

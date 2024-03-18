@@ -19,8 +19,14 @@ def test_cache_never_expire():
     # Initial request, X-FastAPI-Cache header field should equal "Miss"
     response = client.get("/cache_never_expire")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Miss"
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Miss"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -28,8 +34,14 @@ def test_cache_never_expire():
     # Send request to same endpoint, X-FastAPI-Cache header field should now equal "Hit"
     response = client.get("/cache_never_expire")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Hit"
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Hit"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -42,8 +54,14 @@ def test_cache_expires():
     # Initial request, X-FastAPI-Cache header field should equal "Miss"
     response = client.get("/cache_expires")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data should be cached for five seconds"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Miss"
+    assert response.json() == {
+        "success": True,
+        "message": "this data should be cached for five seconds",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Miss"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -54,8 +72,14 @@ def test_cache_expires():
     # Send request, X-FastAPI-Cache header field should now equal "Hit"
     response = client.get("/cache_expires")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data should be cached for five seconds"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Hit"
+    assert response.json() == {
+        "success": True,
+        "message": "this data should be cached for five seconds",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Hit"
+    )
 
     # Verify eTag value matches the value stored from the initial response
     assert "etag" in response.headers
@@ -89,8 +113,14 @@ def test_cache_expires():
     # Send request, X-FastAPI-Cache header field should equal "Miss" since the cached value has been evicted
     response = client.get("/cache_expires")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data should be cached for five seconds"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Miss"
+    assert response.json() == {
+        "success": True,
+        "message": "this data should be cached for five seconds",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Miss"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -107,8 +137,14 @@ def test_cache_json_encoder():
     response_json = response.json()
     assert response_json == {
         "success": True,
-        "start_time": {"_spec_type": "<class 'datetime.datetime'>", "val": "04/20/2021 07:17:17 AM "},
-        "finish_by": {"_spec_type": "<class 'datetime.date'>", "val": "04/21/2021"},
+        "start_time": {
+            "_spec_type": "<class 'datetime.datetime'>",
+            "val": "04/20/2021 07:17:17 AM ",
+        },
+        "finish_by": {
+            "_spec_type": "<class 'datetime.date'>",
+            "val": "04/21/2021",
+        },
         "final_calc": {
             "_spec_type": "<class 'decimal.Decimal'>",
             "val": "3.140000000000000124344978758017532527446746826171875",
@@ -126,9 +162,14 @@ def test_cache_json_encoder():
 def test_cache_control_no_cache():
     # Simple test that verifies if a request is recieved with the cache-control header field containing "no-cache",
     # no caching behavior is performed
-    response = client.get("/cache_never_expire", headers={"cache-control": "no-cache"})
+    response = client.get(
+        "/cache_never_expire", headers={"cache-control": "no-cache"}
+    )
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
     assert "x-fastapi-cache" not in response.headers
     assert "cache-control" not in response.headers
     assert "expires" not in response.headers
@@ -138,9 +179,14 @@ def test_cache_control_no_cache():
 def test_cache_control_no_store():
     # Simple test that verifies if a request is recieved with the cache-control header field containing "no-store",
     # no caching behavior is performed
-    response = client.get("/cache_never_expire", headers={"cache-control": "no-store"})
+    response = client.get(
+        "/cache_never_expire", headers={"cache-control": "no-store"}
+    )
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
     assert "x-fastapi-cache" not in response.headers
     assert "cache-control" not in response.headers
     assert "expires" not in response.headers
@@ -151,8 +197,14 @@ def test_if_none_match():
     # Initial request, response data is added to cache
     response = client.get("/cache_never_expire")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Miss"
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Miss"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -163,10 +215,16 @@ def test_if_none_match():
     invalid_etag = "W/-5480454928453453778"
 
     # Send request to same endpoint where If-None-Match header contains both valid and invalid eTag values
-    response = client.get("/cache_never_expire", headers={"if-none-match": f"{etag}, {invalid_etag}"})
+    response = client.get(
+        "/cache_never_expire",
+        headers={"if-none-match": f"{etag}, {invalid_etag}"},
+    )
     assert response.status_code == 304
     assert not response.content
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Hit"
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Hit"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -175,16 +233,27 @@ def test_if_none_match():
     response = client.get("/cache_never_expire", headers={"if-none-match": "*"})
     assert response.status_code == 304
     assert not response.content
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Hit"
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Hit"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
 
     # Send request to same endpoint where If-None-Match header contains only the invalid eTag value
-    response = client.get("/cache_never_expire", headers={"if-none-match": invalid_etag})
+    response = client.get(
+        "/cache_never_expire", headers={"if-none-match": invalid_etag}
+    )
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data can be cached indefinitely"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Hit"
+    assert response.json() == {
+        "success": True,
+        "message": "this data can be cached indefinitely",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Hit"
+    )
     assert "cache-control" in response.headers
     assert "expires" in response.headers
     assert "etag" in response.headers
@@ -195,8 +264,14 @@ def test_partial_cache_one_hour():
     # is working correctly.
     response = client.get("/cache_one_hour")
     assert response.status_code == 200
-    assert response.json() == {"success": True, "message": "this data should be cached for one hour"}
-    assert "x-fastapi-cache" in response.headers and response.headers["x-fastapi-cache"] == "Miss"
+    assert response.json() == {
+        "success": True,
+        "message": "this data should be cached for one hour",
+    }
+    assert (
+        "x-fastapi-cache" in response.headers
+        and response.headers["x-fastapi-cache"] == "Miss"
+    )
     assert "cache-control" in response.headers
     match = MAX_AGE_REGEX.search(response.headers.get("cache-control"))
     assert match and int(match.groupdict()["ttl"]) == 3600

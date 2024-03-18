@@ -18,7 +18,10 @@ def cache_never_expire(request: Request, response: Response):
 @app.get("/cache_expires")
 @cache(expire=timedelta(seconds=5))
 async def cache_expires():
-    return {"success": True, "message": "this data should be cached for five seconds"}
+    return {
+        "success": True,
+        "message": "this data should be cached for five seconds",
+    }
 
 
 @app.get("/cache_json_encoder")
@@ -35,7 +38,10 @@ def cache_json_encoder():
 @app.get("/cache_one_hour")
 @cache_one_hour()
 def partial_cache_one_hour(response: Response):
-    return {"success": True, "message": "this data should be cached for one hour"}
+    return {
+        "success": True,
+        "message": "this data should be cached for one hour",
+    }
 
 
 @app.get("/cache_invalid_type")
