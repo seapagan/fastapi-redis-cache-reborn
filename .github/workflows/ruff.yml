@@ -4,7 +4,6 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   ruff:
-    if: false # disable this job for now until the code is ready for linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
