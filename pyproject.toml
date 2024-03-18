@@ -33,7 +33,143 @@ mypy = "^1.9.0"
 pre-commit = "^3.6.2"
 ruff = "^0.3.3"
 poethepoet = "^0.25.0"
+pymarkdownlnt = "^0.9.17"
+
+# needed for mupy typing
+types-python-dateutil = "^2.9.0.20240316"
+types-redis = "^4.6.0.20240311"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+# setup PoeThePoet tasks
+pre.cmd = "pre-commit run --all-files"
+pre.help = "Run pre-commit checks"
+mypy.cmd = "mypy . --strict"
+mypy.help = "Run mypy checks"
+format.help = "Format code with Ruff"
+format.cmd = "ruff format ."
+ruff.help = "Run Ruff checks"
+ruff.cmd = "ruff check ."
+markdown.cmd = "pymarkdown --strict-config scan  -r docs/**/*.md"
+markdown.help = "Run markdown checks"
+
+# testing tasks
+test.help = "Run all tests using Pytest"
+test.cmd = "pytest"
+"test:unit".help = "Run only Unit tests using Pytest"
+"test:unit".cmd = "pytest -m unit"
+"test:integration".help = "Run only Integration tests using Pytest"
+"test:integration".cmd = "pytest -m integration"
+"test:skipped".cmd = "pytest --quiet --collect-only -m skip --no-cov"
+"test:skipped".help = "Show skipped tests without running all tests"
+
+# run all linting checks in sequence. we want to run them all, even if one fails
+lint.ignore_fail = "return_non_zero"
+lint.sequence = ["format", "ruff", "mypy", "markdown"]
+lint.help = "Run all linting checks"
+
+# configure assorted tools and linters
+[tool.pymarkdown]
+plugins.md014.enabled = false
+plugins.md046.enabled = false
+plugins.md013.enabled = false
+
+[tool.ruff]
+line-length = 80
+src = ["app"]
+extend-exclude = []
+target-version = "py39" # minimum python version supported
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["ALL"] # we are being very strict!
+ignore = [
+  "ANN101",
+  "PGH003",
+  "FBT002",
+  "FBT003",
+  "B006",
+] # These rules are too strict even for us 😝
+extend-ignore = [
+  "COM812", # ignored for ruff formatting
+  "ISC001", # ignored for ruff formatting
+]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = ["pydantic.validator", "pydantic.root_validator"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**/*.py" = [
+  "S101",   # we can (and MUST!) use 'assert' in test files.
+  "ANN001", # annotations for fixtures are sometimes a pain for test files.
+  "ARG001", # sometimes fixtures are not physically used but have side-effects
+  "ARG002", # as above
+  "TD003",
+  "FIX002",
+  "RUF012",
+]
+
+
+[tool.ruff.lint.flake8-bugbear]
+# extend-immutable-calls = [
+#   "fastapi.Depends",
+#   "fastapi.params.Depends",
+#   "fastapi.Query",
+#   "fastapi.params.Query",
+# ]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+[tool.mypy]
+python_version = "3.9"
+exclude = []
+
+[[tool.mypy.overrides]]
+disable_error_code = ["method-assign", "no-untyped-def", "attr-defined"]
+module = "tests.*"
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = "decouple.*"
+
+[tool.pytest.ini_options]
+addopts = [
+  "-m",
+  "not rewrite",  # mark tests 'rewrite' that need work, and they wont be run
+  "--cov",
+  "--cov-report",
+  "term-missing",
+  "--cov-report",
+  "html",
+]
+filterwarnings = ["ignore:'crypt' is deprecated:DeprecationWarning"]
+markers = [
+  "unit: Unit tests",
+  "integration: Integration tests",
+  "rewrite: Tests need Rewriting",
+]
+testpaths = ["tests"]
+mock_use_standalone_module = true
+
+[tool.coverage.run]
+# source = []
+source = ["src"]
+# omit = ["*/tests/*", "app/commands/*", "app/api_admin.py"]
+omit = ["*/tests/*"]
+concurrency = ["thread", "greenlet"]
