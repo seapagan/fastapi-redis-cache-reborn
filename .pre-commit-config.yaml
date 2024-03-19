@@ -32,6 +32,9 @@ repos:
     hooks:
       - id: mypy
         name: "Check with Mypy"
+        additional_dependencies:
+          - "types-python-dateutil"
+          - "types-redis"
 
   - repo: https://github.com/python-poetry/poetry
     rev: "1.8.0"
