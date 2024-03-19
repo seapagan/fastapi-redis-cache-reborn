@@ -1,21 +1,21 @@
-"""cache.py"""
+"""The main cache decorator code and helpers."""
 
 import asyncio
 from datetime import timedelta
 from functools import partial, update_wrapper, wraps
 from http import HTTPStatus
-from typing import Union
+from typing import Any, Callable, Union
 
 from fastapi import Response
 
 from fastapi_redis_cache.client import FastApiRedisCache
 from fastapi_redis_cache.util import (
-    deserialize_json,
     ONE_DAY_IN_SECONDS,
     ONE_HOUR_IN_SECONDS,
     ONE_MONTH_IN_SECONDS,
     ONE_WEEK_IN_SECONDS,
     ONE_YEAR_IN_SECONDS,
+    deserialize_json,
     serialize_json,
 )
 
@@ -102,8 +102,12 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
     return outer_wrapper
 
 
-async def get_api_response_async(func, *args, **kwargs):
-    """Helper function that allows decorator to work with both async and non-async functions."""
+async def get_api_response_async(
+    func: Callable[..., Any],
+    *args: Any,  # noqa: ANN401
+    **kwargs: dict[str, Any],
+) -> Any:  # noqa: ANN401
+    """Helper function that to handle both async and non-async functions."""
     return (
         await func(*args, **kwargs)
         if asyncio.iscoroutinefunction(func)
@@ -112,7 +116,10 @@ async def get_api_response_async(func, *args, **kwargs):
 
 
 def calculate_ttl(expire: Union[int, timedelta]) -> int:
-    """ "Converts expire time to total seconds and ensures that ttl is capped at one year."""
+    """Converts expire time to total seconds.
+
+    Also ensures ttl is capped at one year.
+    """
     if isinstance(expire, timedelta):
         expire = int(expire.total_seconds())
     return min(expire, ONE_YEAR_IN_SECONDS)

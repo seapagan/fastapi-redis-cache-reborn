@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime, timedelta
-from typing import Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Callable, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from fastapi import Request, Response
 from redis import client
@@ -21,9 +23,12 @@ logger.setLevel(logging.INFO)
 
 
 class MetaSingleton(type):
-    """Metaclass for creating classes that allow only a single instance to be created."""
+    """Metaclass for creating singleton classes.
 
-    _instances = {}
+    These are classesthat allow only a single instance to be created.
+    """
+
+    _instances: ClassVar[dict] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -35,8 +40,8 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     """Communicates with Redis server to cache API response data."""
 
     host_url: str
-    prefix: str = None
-    response_header: str = None
+    prefix: str | None = None
+    response_header: str | None = None
     status: RedisStatus = RedisStatus.NONE
     redis: client.Redis = None
 
@@ -45,7 +50,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         return self.status == RedisStatus.CONNECTED
 
     @property
-    def not_connected(self):
+    def not_connected(self) -> bool:
         return not self.connected
 
     def init(
@@ -53,21 +58,22 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         host_url: str,
         prefix: Optional[str] = None,
         response_header: Optional[str] = None,
-        ignore_arg_types: Optional[List[Type[object]]] = None,
+        ignore_arg_types: Optional[list[type[object]]] = None,
     ) -> None:
-        """Connect to a Redis database using `host_url` and configure cache settings.
+        """Connect to a Redis database using `host_url` and configure cache.
 
         Args:
             host_url (str): URL for a Redis database.
-            prefix (str, optional): Prefix to add to every cache key stored in the
-                Redis database. Defaults to None.
-            response_header (str, optional): Name of the custom header field used to
-                identify cache hits/misses. Defaults to None.
-            ignore_arg_types (List[Type[object]], optional): Each argument to the
-                API endpoint function is used to compose the cache key. If there
-                are any arguments that have no effect on the response (such as a
-                `Request` or `Response` object), including their type in this list
-                will ignore those arguments when the key is created. Defaults to None.
+            prefix (str, optional): Prefix to add to every cache key stored in
+                the Redis database. Defaults to None.
+            response_header (str, optional): Name of the custom header field
+                used to identify cache hits/misses. Defaults to None.
+            ignore_arg_types (List[Type[object]], optional): Each argument to
+                the API endpoint function is used to compose the cache key. If
+                there are any arguments that have no effect on the response
+                (such as a `Request` or `Response` object), including their type
+                in this list will ignore those arguments when the key is
+                created. Defaults to None.
         """
         self.host_url = host_url
         self.prefix = prefix
@@ -75,7 +81,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         self.ignore_arg_types = ignore_arg_types
         self._connect()
 
-    def _connect(self):
+    def _connect(self) -> None:
         self.log(
             RedisEvent.CONNECT_BEGIN,
             msg="Attempting to connect to Redis server...",
@@ -89,7 +95,10 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         if self.status == RedisStatus.AUTH_ERROR:  # pragma: no cover
             self.log(
                 RedisEvent.CONNECT_FAIL,
-                msg="Unable to connect to redis server due to authentication error.",
+                msg=(
+                    "Unable to connect to redis server due to authentication "
+                    "error."
+                ),
             )
         if self.status == RedisStatus.CONN_ERROR:  # pragma: no cover
             self.log(

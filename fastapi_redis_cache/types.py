@@ -1,5 +1,7 @@
-from inspect import Parameter
-from typing import Mapping, Type
+"""Define some helpful type aliases."""
 
-ArgType = Type[object]
+from collections.abc import Mapping
+from inspect import Parameter
+
+ArgType = type[object]
 SigParameters = Mapping[str, Parameter]
