@@ -1,7 +1,7 @@
 """Dummy FastAPI app to test the cache decorator and functionality."""
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Union
 
@@ -38,7 +38,7 @@ def cache_json_encoder() -> (
     """Route that returns a dictionary with different data types."""
     return {
         "success": True,
-        "start_time": datetime(2021, 4, 20, 7, 17, 17),
+        "start_time": datetime(2021, 4, 20, 7, 17, 17, tzinfo=timezone.utc),
         "finish_by": date(2021, 4, 21),
         "final_calc": Decimal(3.14),
     }

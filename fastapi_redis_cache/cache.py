@@ -4,7 +4,7 @@ import asyncio
 from datetime import timedelta
 from functools import partial, update_wrapper, wraps
 from http import HTTPStatus
-from typing import Any, Callable, Union
+from typing import Any, Callable, TypeVar, Union
 
 from fastapi import Response
 
@@ -19,8 +19,14 @@ from fastapi_redis_cache.util import (
     serialize_json,
 )
 
+F = TypeVar("F", bound=Callable[..., Any])
 
-def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
+JSON_MEDIA_TYPE = "application/json"
+
+
+def cache(
+    *, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS
+) -> Callable[[F], F]:
     """Enable caching behavior for the decorated function.
 
     Args:
@@ -29,9 +35,12 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
             31,536,000 seconds (i.e., the number of seconds in one year).
     """
 
-    def outer_wrapper(func):
+    def outer_wrapper(func: F) -> F:
         @wraps(func)
-        async def inner_wrapper(*args, **kwargs) -> Union[Response, Any]:
+        async def inner_wrapper(
+            *args: Any,  # noqa: ANN401
+            **kwargs: Any,  # noqa: ANN401
+        ) -> Union[Response, Any]:  # noqa: ANN401
             """Return cached value if one exists.
 
             Otherwise evaluate the wrapped function and cache the result.
@@ -64,7 +73,7 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
                         Response(
                             content=None,
                             status_code=response.status_code,
-                            media_type="application/json",
+                            media_type=JSON_MEDIA_TYPE,
                             headers=response.headers,
                         )
                         if create_response_directly
@@ -92,7 +101,7 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
                 return (
                     Response(
                         content=serialize_json(response_data),
-                        media_type="application/json",
+                        media_type=JSON_MEDIA_TYPE,
                         headers=response.headers,
                     )
                     if create_response_directly
@@ -100,7 +109,7 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
                 )
             return response_data
 
-        return inner_wrapper
+        return inner_wrapper  # type: ignore
 
     return outer_wrapper
 

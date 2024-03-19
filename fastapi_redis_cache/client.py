@@ -1,16 +1,27 @@
+"""Define the FastApiRedisCache class for caching API responses in Redis."""
+
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, ClassVar, Optional, Union
-
-from fastapi import Request, Response
-from redis import client
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Optional,
+    Union,
+)
+from zoneinfo import ZoneInfo
 
 from fastapi_redis_cache.enums import RedisEvent, RedisStatus
 from fastapi_redis_cache.key_gen import get_cache_key
 from fastapi_redis_cache.redis import redis_connect
 from fastapi_redis_cache.util import serialize_json
+
+if TYPE_CHECKING:
+    from fastapi import Request, Response
+    from redis import client
 
 DEFAULT_RESPONSE_HEADER = "X-FastAPI-Cache"
 ALLOWED_HTTP_TYPES = ["GET"]
@@ -26,11 +37,16 @@ class MetaSingleton(type):
     """Metaclass for creating singleton classes.
 
     These are classes that allow only a single instance to be created.
+    (seapagan): Not happy about my type-hinting here, will re-visit later.
     """
 
-    _instances: ClassVar[dict] = {}
+    _instances: ClassVar[dict[type[Any], Any]] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+        """Return the instance of the class.
+
+        if it already exists then return that,otherwise create it and return.
+        """
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
@@ -43,7 +59,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     prefix: str | None = None
     response_header: str | None = None
     status: RedisStatus = RedisStatus.NONE
-    redis: client.Redis = None
+    redis: client.Redis | None = None  # type: ignore
 
     @property
     def connected(self) -> bool:
@@ -109,6 +125,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             )
 
     def request_is_not_cacheable(self, request: Request) -> bool:
+        """Return True if the request is not cacheable."""
         return request and (
             request.method not in ALLOWED_HTTP_TYPES
             or any(
@@ -118,11 +135,13 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         )
 
     def get_cache_key(self, func: Callable, *args: list, **kwargs: dict) -> str:
+        """Return a key to use for caching the response of a function."""
         return get_cache_key(
             self.prefix, self.ignore_arg_types, func, *args, **kwargs
         )
 
     def check_cache(self, key: str) -> tuple[int, str]:
+        """Check if `key` is in the cache and return its TTL and value."""
         pipe = self.redis.pipeline()
         ttl, in_cache = pipe.ttl(key).get(key).execute()
         if in_cache:
@@ -132,6 +151,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     def requested_resource_not_modified(
         self, request: Request, cached_data: str
     ) -> bool:
+        """Return True if the requested resource has not been modified."""
         if not request or "If-None-Match" not in request.headers:
             return False
         check_etags = [
@@ -144,6 +164,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         return self.get_etag(cached_data) in check_etags
 
     def add_to_cache(self, key: str, value: dict, expire: int) -> bool:
+        """Add `value` to the cache using `key` and set an expiration time."""
         response_data = None
         try:
             response_data = serialize_json(value)
@@ -165,6 +186,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         response_data: dict[str, Any] | None = None,
         ttl: float | None = None,
     ) -> None:
+        """Set headers for the response to indicate cache status and TTL."""
         response.headers[self.response_header] = "Hit" if cache_hit else "Miss"
         expires_at = datetime.now(tz=timezone.utc) + timedelta(
             seconds=ttl or 0.0
