@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
-from typing import Callable, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable, ClassVar, Optional, Union
 
 from fastapi import Request, Response
 from redis import client
@@ -25,7 +25,7 @@ logger.setLevel(logging.INFO)
 class MetaSingleton(type):
     """Metaclass for creating singleton classes.
 
-    These are classesthat allow only a single instance to be created.
+    These are classes that allow only a single instance to be created.
     """
 
     _instances: ClassVar[dict] = {}
@@ -46,11 +46,13 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     redis: client.Redis = None
 
     @property
-    def connected(self):
+    def connected(self) -> bool:
+        """Return True if the Redis client is connected to a server."""
         return self.status == RedisStatus.CONNECTED
 
     @property
     def not_connected(self) -> bool:
+        """Return True if the Redis client is not connected to a server."""
         return not self.connected
 
     def init(
@@ -68,7 +70,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
                 the Redis database. Defaults to None.
             response_header (str, optional): Name of the custom header field
                 used to identify cache hits/misses. Defaults to None.
-            ignore_arg_types (List[Type[object]], optional): Each argument to
+            ignore_arg_types (list[Type[object]], optional): Each argument to
                 the API endpoint function is used to compose the cache key. If
                 there are any arguments that have no effect on the response
                 (such as a `Request` or `Response` object), including their type
@@ -115,12 +117,12 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             )
         )
 
-    def get_cache_key(self, func: Callable, *args: List, **kwargs: Dict) -> str:
+    def get_cache_key(self, func: Callable, *args: list, **kwargs: dict) -> str:
         return get_cache_key(
             self.prefix, self.ignore_arg_types, func, *args, **kwargs
         )
 
-    def check_cache(self, key: str) -> Tuple[int, str]:
+    def check_cache(self, key: str) -> tuple[int, str]:
         pipe = self.redis.pipeline()
         ttl, in_cache = pipe.ttl(key).get(key).execute()
         if in_cache:
@@ -141,7 +143,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             return True
         return self.get_etag(cached_data) in check_etags
 
-    def add_to_cache(self, key: str, value: Dict, expire: int) -> bool:
+    def add_to_cache(self, key: str, value: dict, expire: int) -> bool:
         response_data = None
         try:
             response_data = serialize_json(value)
@@ -159,17 +161,22 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     def set_response_headers(
         self,
         response: Response,
-        cache_hit: bool,
-        response_data: Dict = None,
-        ttl: int = None,
+        cache_hit: bool,  # noqa: FBT001
+        response_data: dict[str, Any] | None = None,
+        ttl: float | None = None,
     ) -> None:
         response.headers[self.response_header] = "Hit" if cache_hit else "Miss"
-        expires_at = datetime.utcnow() + timedelta(seconds=ttl)
+        expires_at = datetime.now(tz=timezone.utc) + timedelta(
+            seconds=ttl or 0.0
+        )
         response.headers["Expires"] = expires_at.strftime(HTTP_TIME)
         response.headers["Cache-Control"] = f"max-age={ttl}"
-        response.headers["ETag"] = self.get_etag(response_data)
-        if "last_modified" in response_data:  # pragma: no cover
-            response.headers["Last-Modified"] = response_data["last_modified"]
+        if response_data:
+            response.headers["ETag"] = self.get_etag(response_data)
+            if "last_modified" in response_data:
+                response.headers["Last-Modified"] = response_data[
+                    "last_modified"
+                ]
 
     def log(
         self,
@@ -177,8 +184,8 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         msg: Optional[str] = None,
         key: Optional[str] = None,
         value: Optional[str] = None,
-    ):
-        """Log `RedisEvent` using the configured `Logger` object"""
+    ) -> None:
+        """Log `RedisEvent` using the configured `Logger` object."""
         message = f" {self.get_log_time()} | {event.name}"
         if msg:
             message += f": {msg}"
@@ -189,7 +196,8 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         logger.info(message)
 
     @staticmethod
-    def get_etag(cached_data: Union[str, bytes, Dict]) -> str:
+    def get_etag(cached_data: Union[str, bytes, dict[str, Any]]) -> str:
+        """Return the etag."""
         if isinstance(cached_data, bytes):
             cached_data = cached_data.decode()
         if not isinstance(cached_data, str):
@@ -197,6 +205,6 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         return f"W/{hash(cached_data)}"
 
     @staticmethod
-    def get_log_time():
+    def get_log_time() -> str:
         """Get a timestamp to include with a log message."""
         return datetime.now().strftime(LOG_TIMESTAMP)

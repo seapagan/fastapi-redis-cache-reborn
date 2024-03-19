@@ -3,6 +3,7 @@
 import json
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any, Union
 
 from dateutil import parser
 
@@ -25,7 +26,8 @@ SERIALIZE_OBJ_MAP = {
 class BetterJsonEncoder(json.JSONEncoder):
     """Subclass the JSONEncoder to handle more types."""
 
-    def default(self, obj):
+    def default(self, obj: Any) -> Union[dict[str, str], Any]:  # noqa: ANN401
+        """Return a serializable object for the JSONEncoder to use."""
         if isinstance(obj, datetime):
             return {
                 "val": obj.strftime(DATETIME_AWARE),
@@ -38,21 +40,22 @@ class BetterJsonEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-def object_hook(obj):
+def object_hook(obj: Any) -> Any:  # noqa: ANN401
+    """Hook for the JSONDecoder to handle custom types."""
     if "_spec_type" not in obj:
         return obj
     _spec_type = obj["_spec_type"]
     if _spec_type not in SERIALIZE_OBJ_MAP:
         msg = f'"{obj["val"]}" (type: {_spec_type}) is not JSON serializable'
         raise TypeError(msg)
-    return SERIALIZE_OBJ_MAP[_spec_type](obj["val"])
+    return SERIALIZE_OBJ_MAP[_spec_type](obj["val"])  # type: ignore
 
 
-def serialize_json(json_dict) -> str:
+def serialize_json(json_dict: dict[str, Any]) -> str:
     """Serialize a dictionary to a JSON string."""
     return json.dumps(json_dict, cls=BetterJsonEncoder)
 
 
-def deserialize_json(json_str):
+def deserialize_json(json_str: str) -> Any:  # noqa: ANN401
     """Deserialize a JSON string to a dictionary."""
     return json.loads(json_str, object_hook=object_hook)

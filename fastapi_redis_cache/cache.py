@@ -25,15 +25,17 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
 
     Args:
         expire (Union[int, timedelta], optional): The number of seconds
-            from now when the cached response should expire. Defaults to 31,536,000
-            seconds (i.e., the number of seconds in one year).
+            from now when the cached response should expire. Defaults to
+            31,536,000 seconds (i.e., the number of seconds in one year).
     """
 
     def outer_wrapper(func):
         @wraps(func)
-        async def inner_wrapper(*args, **kwargs):
-            """Return cached value if one exists, otherwise evaluate the wrapped function and cache the result."""
+        async def inner_wrapper(*args, **kwargs) -> Union[Response, Any]:
+            """Return cached value if one exists.
 
+            Otherwise evaluate the wrapped function and cache the result.
+            """
             func_kwargs = kwargs.copy()
             request = func_kwargs.pop("request", None)
             response = func_kwargs.pop("response", None)
@@ -45,7 +47,8 @@ def cache(*, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS):
                 redis_cache.not_connected
                 or redis_cache.request_is_not_cacheable(request)
             ):
-                # if the redis client is not connected or request is not cacheable, no caching behavior is performed.
+                # if the redis client is not connected or request is not
+                # cacheable, no caching behavior is performed.
                 return await get_api_response_async(func, *args, **kwargs)
             key = redis_cache.get_cache_key(func, *args, **kwargs)
             ttl, in_cache = redis_cache.check_cache(key)

@@ -158,7 +158,9 @@ addopts = [
   "--cov-report",
   "html",
 ]
-filterwarnings = ["ignore:'crypt' is deprecated:DeprecationWarning"]
+filterwarnings = [
+  "ignore:The 'app' shortcut is now deprecated:DeprecationWarning",
+]
 markers = [
   "unit: Unit tests",
   "integration: Integration tests",

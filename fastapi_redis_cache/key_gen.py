@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 ALWAYS_IGNORE_ARG_TYPES = [Response, Request]
 
 
-def get_cache_key(
+def get_cache_key(  # noqa: D417
     prefix: str,
     ignore_arg_types: list[ArgType],
-    func: Callable,
+    func: Callable[..., Any],
     *args: list[Any],
     **kwargs: dict[Any, Any],
 ) -> str:
