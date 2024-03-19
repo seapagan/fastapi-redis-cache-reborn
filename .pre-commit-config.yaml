@@ -32,6 +32,7 @@ repos:
     hooks:
       - id: mypy
         name: "Check with Mypy"
+        args: [--strict, --ignore-missing-imports]
         additional_dependencies:
           - "types-python-dateutil"
           - "types-redis"
