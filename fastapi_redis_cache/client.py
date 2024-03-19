@@ -14,7 +14,7 @@ from fastapi_redis_cache.util import serialize_json
 
 DEFAULT_RESPONSE_HEADER = "X-FastAPI-Cache"
 ALLOWED_HTTP_TYPES = ["GET"]
-LOG_TIMESTAMP = "%m/%d/%Y %I:%M:%S %p"
+LOG_TIMESTAMP = "%m/%d/%Y %H:%M:%S %Z"
 HTTP_TIME = "%a, %d %b %Y %H:%M:%S GMT"
 
 logging.basicConfig()
@@ -207,4 +207,5 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     @staticmethod
     def get_log_time() -> str:
         """Get a timestamp to include with a log message."""
-        return datetime.now().strftime(LOG_TIMESTAMP)
+        local_tz = ZoneInfo("localtime")
+        return datetime.now(local_tz).strftime(LOG_TIMESTAMP)
