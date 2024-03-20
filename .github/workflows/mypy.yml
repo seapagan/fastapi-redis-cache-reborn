@@ -11,4 +11,5 @@ jobs:
         uses: jpetrucciani/mypy-check@master
         with:
           path: "."
-          mypy_flags: "--install-types --config-file pyproject.toml"
+          mypy_flags:
+            "--install-types --non-interactive --config-file pyproject.toml"
