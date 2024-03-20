@@ -10,5 +10,5 @@ jobs:
       - name: Mypy
         uses: jpetrucciani/mypy-check@master
         with:
-          path: ""
+          path: "."
           mypy_flags: "--config-file pyproject.toml"
