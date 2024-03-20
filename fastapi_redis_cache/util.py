@@ -4,7 +4,7 @@ import json
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Union
+from typing import Any, Callable, Union
 from uuid import UUID
 
 from dateutil import parser
@@ -25,6 +25,8 @@ SERIALIZE_OBJ_MAP = {
     str(Decimal): Decimal,
 }
 
+HandlerType = Callable[[Any], Union[dict[str, str], str]]
+
 
 class BetterJsonEncoder(json.JSONEncoder):
     """Subclass the JSONEncoder to handle more types."""
@@ -35,41 +37,24 @@ class BetterJsonEncoder(json.JSONEncoder):
         This is re-written from the original code to handle more types, and not
         end up with a mass of if-else and return statements.
         """
-
-        def handle_datetime() -> dict[str, str]:
-            return {
-                "val": obj.strftime(DATETIME_AWARE),
+        type_mapping: dict[type, HandlerType] = {
+            datetime: lambda o: {
+                "val": o.strftime(DATETIME_AWARE),
                 "_spec_type": str(datetime),
-            }
-
-        def handle_date() -> dict[str, str]:
-            return {"val": obj.strftime(DATE_ONLY), "_spec_type": str(date)}
-
-        def handle_decimal() -> dict[str, str]:
-            return {"val": str(obj), "_spec_type": str(Decimal)}
-
-        def handle_basemodel() -> Any:  # noqa: ANN401
-            """Handle a Pydantic BaseModel object."""
-            return obj.model_dump()
-
-        def handle_uuid() -> str:
-            return str(obj)
-
-        def handle_enum() -> str:
-            return str(obj.value)
-
-        type_mapping = {
-            datetime: handle_datetime,
-            date: handle_date,
-            Decimal: handle_decimal,
-            BaseModel: handle_basemodel,
-            UUID: handle_uuid,
-            Enum: handle_enum,
+            },
+            date: lambda o: {
+                "val": o.strftime(DATE_ONLY),
+                "_spec_type": str(date),
+            },
+            Decimal: lambda o: {"val": str(o), "_spec_type": str(Decimal)},
+            BaseModel: lambda o: o.model_dump(),
+            UUID: lambda o: str(o),
+            Enum: lambda o: str(o.value),
         }
 
         for obj_type, handler in type_mapping.items():
             if isinstance(obj, obj_type):
-                return handler()
+                return handler(obj)
 
         return super().default(obj)
 
