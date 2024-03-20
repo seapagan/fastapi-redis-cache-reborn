@@ -13,3 +13,5 @@ jobs:
           path: "."
           mypy_flags:
             "--install-types --non-interactive --config-file pyproject.toml"
+          requirements_file: "requirements.txt"
+          python_version: "3.11"
