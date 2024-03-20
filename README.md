@@ -1,11 +1,10 @@
-# fastapi-redis-cache <!-- omit in toc -->
+# fastapi-redis-cache-reborn <!-- omit in toc -->
 
-<!-- [![PyPI version](https://badge.fury.io/py/fastapi-redis-cache.svg)](https://badge.fury.io/py/fastapi-redis-cache)
+<!-- [![PyPI version](https://badge.fury.io/py/fastapi-redis-cache-reborn.svg)](https://badge.fury.io/py/fastapi-redis-cache-reborn)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-redis-cache?color=%234DC71F)
 ![PyPI - License](https://img.shields.io/pypi/l/fastapi-redis-cache?color=%25234DC71F)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fastapi-redis-cache)
-[![Maintainability](https://api.codeclimate.com/v1/badges/ec0b1d7afb21bd8c23dc/maintainability)](https://codeclimate.com/github/a-luna/fastapi-redis-cache/maintainability)
-[![codecov](https://codecov.io/gh/a-luna/fastapi-redis-cache/branch/main/graph/badge.svg?token=dUaILJcgWY)](https://codecov.io/gh/a-luna/fastapi-redis-cache) -->
+-->
 
 - [Important](#important)
 - [Features](#features)
@@ -23,17 +22,21 @@
 
 This project is a continuation of
 [fastapi-redis-cache](https://github.com/a-luna/fastapi-redis-cache) which seems
-to no longer be maintained. I decided to split this as a separate repository
-rather than a fork, since the original project has had no activity for a over
-three years.
+to no longer be maintained and had fallen behind in both `Redis` and `FastAPI`
+versions. I decided to split this as a separate repository rather than a fork,
+since the original project has had no activity for a over three years.
 
-Right now the code is exactly the same as the original project, but I have
+Right now the code is basically the same as the original project, but I have
 updated the Package management system to use `Poetry`, the dependencies and the
-CI/CD pipeline. I'll also merge any useful PR's that are open in the original
-project.
+CI/CD pipeline. I've also merged some open PRs from the original project that
+fixed some issues.
 
-Currently, even though the tests all pass there is no guarantee that the
-project works as expected until I have tested it in a real project.
+See the [TODO File](TODO.md) file for a list of things I plan to do in the near
+future.
+
+**Note: You will still import the package as `fastapi_redis_cache` in your code,
+the name has only changed on PyPI to avoid conflicts with the original
+package. This is to make it transparent to migrate to this version.**
 
 ## Features
 
@@ -46,18 +49,19 @@ project works as expected until I have tested it in a real project.
 
 ## Installation
 
-`pip install fastapi-redis-cache`
+`pip install fastapi-redis-cache-reborn`
 
 ## Usage
 
 ### Initialize Redis
 
-Create a `FastApiRedisCache` instance when your application starts by [defining
-an event handler for the `"startup"`
-event](https://fastapi.tiangolo.com/advanced/events/) as shown below:
+Create a `FastApiRedisCache` instance when your application starts by defining
+a ['lifespan' event handler](<https://fastapi.tiangolo.com/advanced/events/>) as shown below:
 
 ```python {linenos=table}
 import os
+
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
 from fastapi_redis_cache import FastApiRedisCache, cache
@@ -65,10 +69,8 @@ from sqlalchemy.orm import Session
 
 LOCAL_REDIS_URL = "redis://127.0.0.1:6379"
 
-app = FastAPI(title="FastAPI Redis Cache Example")
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan():
     redis_cache = FastApiRedisCache()
     redis_cache.init(
         host_url=os.environ.get("REDIS_URL", LOCAL_REDIS_URL),
@@ -76,6 +78,12 @@ def startup():
         response_header="X-MyAPI-Cache",
         ignore_arg_types=[Request, Response, Session]
     )
+    yield
+
+app = FastAPI(title="FastAPI Redis Cache Example",lifespan=lifespan)
+
+# routes and more code
+
 ```
 
 After creating the instance, you must call the `init` method. The only required
