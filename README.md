@@ -6,11 +6,12 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fastapi-redis-cache)
 -->
 
-- [Important](#important)
+- [Migrating from `fastapi-redis-cache`](#migrating-from-fastapi-redis-cache)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Initialize Redis](#initialize-redis)
+  - [Redis Server](#redis-server)
+  - [Initialize Redis in your FastAPI application](#initialize-redis-in-your-fastapi-application)
   - [`@cache` Decorator](#cache-decorator)
     - [Response Headers](#response-headers)
     - [Pre-defined Lifetimes](#pre-defined-lifetimes)
@@ -18,7 +19,7 @@
   - [Cache Keys Pt 2](#cache-keys-pt-2)
 - [Questions/Contributions](#questionscontributions)
 
-## Important
+## Migrating from `fastapi-redis-cache`
 
 This project is a continuation of
 [fastapi-redis-cache](https://github.com/a-luna/fastapi-redis-cache) which seems
@@ -34,9 +35,15 @@ fixed some issues.
 See the [TODO File](TODO.md) file for a list of things I plan to do in the near
 future.
 
-**Note: You will still import the package as `fastapi_redis_cache` in your code,
-the name has only changed on PyPI to avoid conflicts with the original
-package. This is to make it transparent to migrate to this version.**
+The package still has the same interface and classes as the original. You will
+still import the package as `fastapi_redis_cache` in your code, the name has
+only changed on PyPI to avoid conflicts with the original package. This is to
+make it transparent to migrate to this version.
+
+However, it is important to make sure that the old package is uninstalled before
+installing this one. The package name has changed, but the module name is still
+`fastapi_redis_cache`. **The best way is to remove your old virtual environment
+and run `pip install` or `poetry install` again**.
 
 ## Features
 
@@ -49,11 +56,30 @@ package. This is to make it transparent to migrate to this version.**
 
 ## Installation
 
-`pip install fastapi-redis-cache-reborn`
+if you are using `poetry` (recommended):
+
+```bash
+poetry add fastapi-redis-cache-reborn
+```
+
+Otherwise you can use `pip`:
+
+```bash
+pip install fastapi-redis-cache-reborn
+```
 
 ## Usage
 
-### Initialize Redis
+### Redis Server
+
+You will need access to a Redis server. If you don't have one running locally,
+you can use `Docker` or even a cloud service like `RedisLabs` or `AWS
+ElastiCache`.
+
+Replace the `REDIS_SERVER_URL` with the address and port of your Redis server as
+in the example below:
+
+### Initialize Redis in your FastAPI application
 
 Create a `FastApiRedisCache` instance when your application starts by defining
 a ['lifespan' event handler](<https://fastapi.tiangolo.com/advanced/events/>) as shown below:
@@ -67,13 +93,13 @@ from fastapi import FastAPI, Request, Response
 from fastapi_redis_cache import FastApiRedisCache, cache
 from sqlalchemy.orm import Session
 
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"
+REDIS_SERVER_URL = "redis://127.0.0.1:6379"
 
 @asynccontextmanager
 async def lifespan():
     redis_cache = FastApiRedisCache()
     redis_cache.init(
-        host_url=os.environ.get("REDIS_URL", LOCAL_REDIS_URL),
+        host_url=os.environ.get("REDIS_URL", REDIS_SERVER_URL),
         prefix="myapi-cache",
         response_header="X-MyAPI-Cache",
         ignore_arg_types=[Request, Response, Session]
