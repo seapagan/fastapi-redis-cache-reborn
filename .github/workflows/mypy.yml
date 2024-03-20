@@ -6,7 +6,7 @@ jobs:
   mypy:
     # disable for now until I can figure out how to get it to work. This reports
     # issues that the local one does not.
-    if: false
+    # if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
