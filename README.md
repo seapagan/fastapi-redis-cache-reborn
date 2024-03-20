@@ -29,8 +29,8 @@ since the original project has had no activity for a over three years.
 
 Right now the code is basically the same as the original project, but I have
 updated the Package management system to use `Poetry`, the dependencies and the
-CI/CD pipeline. I've also merged some open PRs from the original project that
-fixed some issues.
+CI/CD pipeline, and added type-hinting. I've also merged some open PRs from the
+original project that fixed some issues.
 
 See the [TODO File](TODO.md) file for a list of things I plan to do in the near
 future.
