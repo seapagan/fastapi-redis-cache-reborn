@@ -3,9 +3,12 @@
 import json
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Union
+from enum import Enum
+from typing import Any, Callable, Union
+from uuid import UUID
 
 from dateutil import parser
+from pydantic import BaseModel
 
 DATETIME_AWARE = "%m/%d/%Y %I:%M:%S %p %z"
 DATE_ONLY = "%m/%d/%Y"
@@ -22,21 +25,37 @@ SERIALIZE_OBJ_MAP = {
     str(Decimal): Decimal,
 }
 
+HandlerType = Callable[[Any], Union[dict[str, str], str]]
+
 
 class BetterJsonEncoder(json.JSONEncoder):
     """Subclass the JSONEncoder to handle more types."""
 
     def default(self, obj: Any) -> Union[dict[str, str], Any]:  # noqa: ANN401
-        """Return a serializable object for the JSONEncoder to use."""
-        if isinstance(obj, datetime):
-            return {
-                "val": obj.strftime(DATETIME_AWARE),
+        """Return a serializable object for the JSONEncoder to use.
+
+        This is re-written from the original code to handle more types, and not
+        end up with a mass of if-else and return statements.
+        """
+        type_mapping: dict[type, HandlerType] = {
+            datetime: lambda o: {
+                "val": o.strftime(DATETIME_AWARE),
                 "_spec_type": str(datetime),
-            }
-        if isinstance(obj, date):
-            return {"val": obj.strftime(DATE_ONLY), "_spec_type": str(date)}
-        if isinstance(obj, Decimal):
-            return {"val": str(obj), "_spec_type": str(Decimal)}
+            },
+            date: lambda o: {
+                "val": o.strftime(DATE_ONLY),
+                "_spec_type": str(date),
+            },
+            Decimal: lambda o: {"val": str(o), "_spec_type": str(Decimal)},
+            BaseModel: lambda o: o.model_dump(),
+            UUID: lambda o: str(o),
+            Enum: lambda o: str(o.value),
+        }
+
+        for obj_type, handler in type_mapping.items():
+            if isinstance(obj, obj_type):
+                return handler(obj)
+
         return super().default(obj)
 
 
