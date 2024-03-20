@@ -42,7 +42,7 @@ class MetaSingleton(type):
 
     _instances: ClassVar[dict[type[Any], Any]] = {}
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         """Return the instance of the class.
 
         if it already exists then return that,otherwise create it and return.
@@ -56,7 +56,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     """Communicates with Redis server to cache API response data."""
 
     host_url: str
-    prefix: str | None = None
+    prefix: str = ""
     response_header: str | None = None
     status: RedisStatus = RedisStatus.NONE
     redis: client.Redis | None = None  # type: ignore
@@ -74,7 +74,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     def init(
         self,
         host_url: str,
-        prefix: Optional[str] = None,
+        prefix: str = "",
         response_header: Optional[str] = None,
         ignore_arg_types: Optional[list[type[object]]] = None,
     ) -> None:
@@ -96,7 +96,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         self.host_url = host_url
         self.prefix = prefix
         self.response_header = response_header or DEFAULT_RESPONSE_HEADER
-        self.ignore_arg_types = ignore_arg_types
+        self.ignore_arg_types = ignore_arg_types or []
         self._connect()
 
     def _connect(self) -> None:
@@ -126,7 +126,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
 
     def request_is_not_cacheable(self, request: Request) -> bool:
         """Return True if the request is not cacheable."""
-        return request and (
+        return request and (  # type: ignore
             request.method not in ALLOWED_HTTP_TYPES
             or any(
                 directive in request.headers.get("Cache-Control", "")
@@ -134,7 +134,9 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             )
         )
 
-    def get_cache_key(self, func: Callable, *args: list, **kwargs: dict) -> str:
+    def get_cache_key(
+        self, func: Callable[..., Any], *args: Any, **kwargs: Any
+    ) -> str:
         """Return a key to use for caching the response of a function."""
         return get_cache_key(
             self.prefix, self.ignore_arg_types, func, *args, **kwargs
@@ -163,7 +165,9 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             return True
         return self.get_etag(cached_data) in check_etags
 
-    def add_to_cache(self, key: str, value: dict, expire: int) -> bool:
+    def add_to_cache(
+        self, key: str, value: dict[str, Any], expire: int
+    ) -> bool:
         """Add `value` to the cache using `key` and set an expiration time."""
         response_data = None
         try:
@@ -175,7 +179,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         cached = self.redis.set(name=key, value=response_data, ex=expire)
         if cached:
             self.log(RedisEvent.KEY_ADDED_TO_CACHE, key=key)
-        else:  # pragma: no cover
+        else:
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, key=key, value=value)
         return cached
 
