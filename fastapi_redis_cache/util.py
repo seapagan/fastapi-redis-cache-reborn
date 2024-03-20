@@ -1,6 +1,9 @@
+"""Define utility functions for the fastapi_redis_cache package."""
+
 import json
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any, Union
 
 from dateutil import parser
 
@@ -21,29 +24,38 @@ SERIALIZE_OBJ_MAP = {
 
 
 class BetterJsonEncoder(json.JSONEncoder):
-    def default(self, obj):
+    """Subclass the JSONEncoder to handle more types."""
+
+    def default(self, obj: Any) -> Union[dict[str, str], Any]:  # noqa: ANN401
+        """Return a serializable object for the JSONEncoder to use."""
         if isinstance(obj, datetime):
-            return {"val": obj.strftime(DATETIME_AWARE), "_spec_type": str(datetime)}
-        elif isinstance(obj, date):
+            return {
+                "val": obj.strftime(DATETIME_AWARE),
+                "_spec_type": str(datetime),
+            }
+        if isinstance(obj, date):
             return {"val": obj.strftime(DATE_ONLY), "_spec_type": str(date)}
-        elif isinstance(obj, Decimal):
+        if isinstance(obj, Decimal):
             return {"val": str(obj), "_spec_type": str(Decimal)}
-        else:  # pragma: no cover
-            return super().default(obj)
+        return super().default(obj)
 
 
-def object_hook(obj):
+def object_hook(obj: Any) -> Any:  # noqa: ANN401
+    """Hook for the JSONDecoder to handle custom types."""
     if "_spec_type" not in obj:
         return obj
     _spec_type = obj["_spec_type"]
-    if _spec_type not in SERIALIZE_OBJ_MAP:  # pragma: no cover
-        raise TypeError(f'"{obj["val"]}" (type: {_spec_type}) is not JSON serializable')
-    return SERIALIZE_OBJ_MAP[_spec_type](obj["val"])
+    if _spec_type not in SERIALIZE_OBJ_MAP:
+        msg = f'"{obj["val"]}" (type: {_spec_type}) is not JSON serializable'
+        raise TypeError(msg)
+    return SERIALIZE_OBJ_MAP[_spec_type](obj["val"])  # type: ignore
 
 
-def serialize_json(json_dict):
+def serialize_json(json_dict: dict[str, Any]) -> str:
+    """Serialize a dictionary to a JSON string."""
     return json.dumps(json_dict, cls=BetterJsonEncoder)
 
 
-def deserialize_json(json_str):
+def deserialize_json(json_str: str) -> Any:  # noqa: ANN401
+    """Deserialize a JSON string to a dictionary."""
     return json.loads(json_str, object_hook=object_hook)

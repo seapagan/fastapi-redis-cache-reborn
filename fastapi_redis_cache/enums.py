@@ -1,3 +1,5 @@
+"""Define ENUMs used through out the package."""
+
 from enum import IntEnum
 
 
