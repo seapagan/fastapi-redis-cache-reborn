@@ -57,7 +57,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
 
     host_url: str
     prefix: str = ""
-    response_header: str | None = None
+    response_header: str = ""
     status: RedisStatus = RedisStatus.NONE
     redis: client.Redis | None = None  # type: ignore
 
@@ -126,7 +126,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
 
     def request_is_not_cacheable(self, request: Request) -> bool:
         """Return True if the request is not cacheable."""
-        return request and (  # type: ignore
+        return bool(request) and (
             request.method not in ALLOWED_HTTP_TYPES
             or any(
                 directive in request.headers.get("Cache-Control", "")
@@ -144,6 +144,11 @@ class FastApiRedisCache(metaclass=MetaSingleton):
 
     def check_cache(self, key: str) -> tuple[int, str]:
         """Check if `key` is in the cache and return its TTL and value."""
+        if not self.redis:
+            # This should not get here if self.redis is still None, but is added
+            # to satisfy mypy until I can refactor the code to fix this.
+            return (0, "")
+
         pipe = self.redis.pipeline()
         ttl, in_cache = pipe.ttl(key).get(key).execute()
         if in_cache:
@@ -165,10 +170,12 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             return True
         return self.get_etag(cached_data) in check_etags
 
-    def add_to_cache(
-        self, key: str, value: dict[str, Any], expire: int
-    ) -> bool:
+    def add_to_cache(self, key: str, value: Any, expire: int) -> bool:
         """Add `value` to the cache using `key` and set an expiration time."""
+        # quick hack to satisfy mypy until I can refactor the code to fix this
+        if not self.redis:
+            return False
+
         response_data = None
         try:
             response_data = serialize_json(value)
@@ -177,10 +184,11 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, msg=message, key=key)
             return False
         cached = self.redis.set(name=key, value=response_data, ex=expire)
-        if cached:
-            self.log(RedisEvent.KEY_ADDED_TO_CACHE, key=key)
-        else:
+        if not cached:
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, key=key, value=value)
+            return False
+
+        self.log(RedisEvent.KEY_ADDED_TO_CACHE, key=key)
         return cached
 
     def set_response_headers(

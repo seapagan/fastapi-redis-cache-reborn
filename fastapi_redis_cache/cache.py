@@ -4,7 +4,7 @@ import asyncio
 from datetime import timedelta
 from functools import partial, update_wrapper, wraps
 from http import HTTPStatus
-from typing import Any, Callable, TypeVar, Union
+from typing import Any, Callable, Union
 
 from fastapi import Response
 
@@ -19,14 +19,12 @@ from fastapi_redis_cache.util import (
     serialize_json,
 )
 
-F = TypeVar("F", bound=Callable[..., Any])
-
 JSON_MEDIA_TYPE = "application/json"
 
 
 def cache(
     *, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS
-) -> Callable[[F], F]:
+) -> Callable[..., Any]:
     """Enable caching behavior for the decorated function.
 
     Args:
@@ -35,12 +33,12 @@ def cache(
             31,536,000 seconds (i.e., the number of seconds in one year).
     """
 
-    def outer_wrapper(func: F) -> F:
+    def outer_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
         async def inner_wrapper(
             *args: Any,  # noqa: ANN401
             **kwargs: Any,  # noqa: ANN401
-        ) -> Union[Response, Any]:  # noqa: ANN401
+        ) -> Any:  # noqa: ANN401
             """Return cached value if one exists.
 
             Otherwise evaluate the wrapped function and cache the result.
@@ -109,7 +107,7 @@ def cache(
                 )
             return response_data
 
-        return inner_wrapper  # type: ignore
+        return inner_wrapper
 
     return outer_wrapper
 
