@@ -3,9 +3,12 @@
 import json
 from datetime import date, datetime
 from decimal import Decimal
+from enum import Enum
 from typing import Any, Union
+from uuid import UUID
 
 from dateutil import parser
+from pydantic import BaseModel
 
 DATETIME_AWARE = "%m/%d/%Y %I:%M:%S %p %z"
 DATE_ONLY = "%m/%d/%Y"
@@ -27,16 +30,47 @@ class BetterJsonEncoder(json.JSONEncoder):
     """Subclass the JSONEncoder to handle more types."""
 
     def default(self, obj: Any) -> Union[dict[str, str], Any]:  # noqa: ANN401
-        """Return a serializable object for the JSONEncoder to use."""
-        if isinstance(obj, datetime):
+        """Return a serializable object for the JSONEncoder to use.
+
+        This is re-written from the original code to handle more types, and not
+        end up with a mass of if-else and return statements.
+        """
+
+        def handle_datetime() -> dict[str, str]:
             return {
                 "val": obj.strftime(DATETIME_AWARE),
                 "_spec_type": str(datetime),
             }
-        if isinstance(obj, date):
+
+        def handle_date() -> dict[str, str]:
             return {"val": obj.strftime(DATE_ONLY), "_spec_type": str(date)}
-        if isinstance(obj, Decimal):
+
+        def handle_decimal() -> dict[str, str]:
             return {"val": str(obj), "_spec_type": str(Decimal)}
+
+        def handle_basemodel() -> Any:  # noqa: ANN401
+            """Handle a Pydantic BaseModel object."""
+            return obj.model_dump()
+
+        def handle_uuid() -> str:
+            return str(obj)
+
+        def handle_enum() -> str:
+            return str(obj.value)
+
+        type_mapping = {
+            datetime: handle_datetime,
+            date: handle_date,
+            Decimal: handle_decimal,
+            BaseModel: handle_basemodel,
+            UUID: handle_uuid,
+            Enum: handle_enum,
+        }
+
+        for obj_type, handler in type_mapping.items():
+            if isinstance(obj, obj_type):
+                return handler()
+
         return super().default(obj)
 
 
