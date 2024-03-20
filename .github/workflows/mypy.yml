@@ -4,8 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   mypy:
-    # disable for now until I can figure out how to get it to work. This reports
-    # issues that the local one does not.
+    # uncomment the line before to disable this job if needed.
     # if: false
     runs-on: ubuntu-latest
     steps:
