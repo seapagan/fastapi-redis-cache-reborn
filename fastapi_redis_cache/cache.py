@@ -49,6 +49,10 @@ def cache(
             create_response_directly = not response
             if create_response_directly:
                 response = Response()
+                # below fix by @jaepetto on the original repo.
+                if "content-length" in response.headers:
+                    del response.headers["content-length"]
+
             redis_cache = FastApiRedisCache()
             if (
                 redis_cache.not_connected
