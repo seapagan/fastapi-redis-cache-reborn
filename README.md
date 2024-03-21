@@ -96,7 +96,7 @@ from sqlalchemy.orm import Session
 REDIS_SERVER_URL = "redis://127.0.0.1:6379"
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     redis_cache = FastApiRedisCache()
     redis_cache.init(
         host_url=os.environ.get("REDIS_URL", REDIS_SERVER_URL),
