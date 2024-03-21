@@ -6,10 +6,11 @@ live Redis server instead of a fake one.
 
 import logging
 import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Union
+from typing import Any, Union
 
 from fastapi import FastAPI, Request, Response
 
@@ -24,7 +25,8 @@ REDIS_SERVER_URL = "redis://127.0.0.1:"
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
+    """Configure the cache and yield the app."""
     redis_cache = FastApiRedisCache()
     redis_cache.init(
         host_url=os.environ.get("REDIS_URL", REDIS_SERVER_URL),

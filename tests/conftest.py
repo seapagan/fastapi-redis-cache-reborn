@@ -4,6 +4,7 @@ import os
 from typing import Literal
 
 import pytest
+
 from fastapi_redis_cache import FastApiRedisCache
 
 

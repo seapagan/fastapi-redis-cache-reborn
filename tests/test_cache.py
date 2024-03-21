@@ -9,9 +9,9 @@ from decimal import Decimal
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+
 from fastapi_redis_cache.client import HTTP_TIME
 from fastapi_redis_cache.util import ONE_HOUR_IN_SECONDS, deserialize_json
-
 from tests.main import app
 
 client = TestClient(app)

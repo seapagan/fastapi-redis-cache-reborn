@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import Union
 
 from fastapi import FastAPI, Request, Response
+
 from fastapi_redis_cache import cache, cache_one_hour, cache_one_minute
 
 app = FastAPI(title="FastAPI Redis Cache Test App")
