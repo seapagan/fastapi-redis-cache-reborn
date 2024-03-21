@@ -6,5 +6,8 @@ These below are from Issues or PRs in the original repository.
   (<https://github.com/a-luna/fastapi-redis-cache/issues/63>)
 - Add support for caching non-FastAPI functions
   (<https://github.com/a-luna/fastapi-redis-cache/pull/66>)
-- Take a look at other issues in the original repository to see if any need to be
-added here.
+- Take a look at other issues in the original repository to see if any need to
+  be added here.
+- add an option to the init function to disable logging of cache hits and
+  misses. or only display these messages if a certain ENV variable is set/unset?
+- add an option to have a separate logging file for cache hits and misses?
