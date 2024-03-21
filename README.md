@@ -73,16 +73,25 @@ pip install fastapi-redis-cache-reborn
 ### Redis Server
 
 You will need access to a Redis server. If you don't have one running locally,
-you can use `Docker` or even a cloud service like `RedisLabs` or `AWS
-ElastiCache`.
+you can use `Docker` or even a cloud service like
+[Redis Cloud](https://redis.com/cloud/overview/) or [AWS
+ElastiCache](https://aws.amazon.com/elasticache/redis/).
 
-Replace the `REDIS_SERVER_URL` with the address and port of your Redis server as
-in the example below:
+There is a `docker-compose-redis-only.yml` file in the root of this repository
+that you can use to start a Redis server locally. Just run:
+
+```bash
+docker compose -f docker-compose-redis-only.yml u
+```
+
+This will start a Redis server on `localhost:6379`, without any password.
 
 ### Initialize Redis in your FastAPI application
 
-Create a `FastApiRedisCache` instance when your application starts by defining
-a ['lifespan' event handler](<https://fastapi.tiangolo.com/advanced/events/>) as shown below:
+Create a `FastApiRedisCache` instance when your application starts by defining a
+['lifespan' event handler](<https://fastapi.tiangolo.com/advanced/events/>) as
+shown below. Replace the `REDIS_SERVER_URL` with the address and port of your
+own Redis server.
 
 ```python {linenos=table}
 import os
