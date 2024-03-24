@@ -7,7 +7,7 @@ from fastapi import Request, Response
 
 from fastapi_redis_cache.types import ArgType, SigParameters
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from collections import OrderedDict
 
 ALWAYS_IGNORE_ARG_TYPES = [Response, Request]

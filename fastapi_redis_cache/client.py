@@ -19,7 +19,7 @@ from fastapi_redis_cache.key_gen import get_cache_key
 from fastapi_redis_cache.redis import redis_connect
 from fastapi_redis_cache.util import serialize_json
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from fastapi import Request, Response
     from redis import client
 
