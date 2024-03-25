@@ -135,11 +135,15 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         )
 
     def get_cache_key(
-        self, func: Callable[..., Any], *args: Any, **kwargs: Any
+        self,
+        tag: str | None,
+        func: Callable[..., Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> str:
         """Return a key to use for caching the response of a function."""
         return get_cache_key(
-            self.prefix, self.ignore_arg_types, func, *args, **kwargs
+            self.prefix, tag, self.ignore_arg_types, func, *args, **kwargs
         )
 
     def check_cache(self, key: str) -> tuple[int, str]:

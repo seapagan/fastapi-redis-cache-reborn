@@ -1,5 +1,7 @@
 """The main cache decorator code and helpers."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import timedelta
 from functools import partial, update_wrapper, wraps
@@ -23,7 +25,9 @@ JSON_MEDIA_TYPE = "application/json"
 
 
 def cache(
-    *, expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS
+    *,
+    expire: Union[int, timedelta] = ONE_YEAR_IN_SECONDS,
+    tag: str | None = None,
 ) -> Callable[..., Any]:
     """Enable caching behavior for the decorated function.
 
@@ -31,6 +35,9 @@ def cache(
         expire (Union[int, timedelta], optional): The number of seconds
             from now when the cached response should expire. Defaults to
             31,536,000 seconds (i.e., the number of seconds in one year).
+        tag (str, optional): A tag to associate with the cached response. This
+            can later be used to invalidate all cached responses with the same
+            tag, or for further fine-grained cache expiry. Defaults to None.
     """
 
     def outer_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -61,7 +68,7 @@ def cache(
                 # if the redis client is not connected or request is not
                 # cacheable, no caching behavior is performed.
                 return await get_api_response_async(func, *args, **kwargs)
-            key = redis_cache.get_cache_key(func, *args, **kwargs)
+            key = redis_cache.get_cache_key(tag, func, *args, **kwargs)
             ttl, in_cache = redis_cache.check_cache(key)
             if in_cache:
                 redis_cache.set_response_headers(
