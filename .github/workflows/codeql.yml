@@ -22,7 +22,6 @@ on:
 
 jobs:
   analyze:
-    if: false # disable while repo is private
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
