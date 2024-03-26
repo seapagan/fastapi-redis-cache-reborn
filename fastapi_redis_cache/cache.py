@@ -100,6 +100,10 @@ def cache(
             response_data = await get_api_response_async(func, *args, **kwargs)
             ttl = calculate_ttl(expire)
             cached = redis_cache.add_to_cache(key, response_data, ttl)
+            if tag:
+                # if tag is provided, add the key to the tag set. This should
+                # help us search quicker for keys to invalidate.
+                redis_cache.add_key_to_tag_set(tag, key)
             if cached:
                 redis_cache.set_response_headers(
                     response,

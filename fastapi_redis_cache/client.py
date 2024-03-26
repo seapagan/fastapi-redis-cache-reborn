@@ -146,6 +146,22 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             self.prefix, tag, self.ignore_arg_types, func, *args, **kwargs
         )
 
+    def add_key_to_tag_set(self, tag: str, key: str) -> None:
+        """Add a key to a set of keys associated with a tag.
+
+        Searching for keys to invalidate is faster when they are grouped by tag
+        as it reduces the number of keys to search through.
+
+        However, keys are not removed from the tag set when they expire so will
+        need to handle possibly stale keys when invalidating.
+        """
+        if self.redis:
+            self.redis.sadd(tag, key)
+
+    def get_tagged_keys(self, tag: str) -> set[str]:
+        """Return a set of keys associated with a tag."""
+        return self.redis.smembers(tag) if self.redis else set()
+
     def check_cache(self, key: str) -> tuple[int, str]:
         """Check if `key` is in the cache and return its TTL and value."""
         if not self.redis:

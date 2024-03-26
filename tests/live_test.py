@@ -50,7 +50,7 @@ def cache_never_expire(
 
 
 @app.get("/cache_expires")
-@cache(expire=timedelta(seconds=5))
+@cache(expire=timedelta(seconds=5), tag="test_tag_1")
 async def cache_expires() -> dict[str, Union[bool, str]]:
     """Route where the cache expires after 5 seconds."""
     return {
