@@ -13,7 +13,7 @@ These below are from Issues or PRs in the original repository.
 - add an option to have a separate logging file for cache hits and misses?
 - remove creating a test Redis from `redis.py`. This should not be done in the
   production logic, but set up in the test logic.
-- add a `cache_key` or `tag` parameter to the `cache` decorator to allow for
-  custom cache keys
 - remove the FakeRedis from the `_connect_` function. This should be set up in
   the test logic not production code.
+- catch invalid cache type exceptions and raise a more informative error
+  message.

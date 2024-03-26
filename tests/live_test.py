@@ -50,7 +50,7 @@ def cache_never_expire(
 
 
 @app.get("/cache_expires")
-@cache(expire=timedelta(seconds=5))
+@cache(expire=timedelta(seconds=5), tag="test_tag_1")
 async def cache_expires() -> dict[str, Union[bool, str]]:
     """Route where the cache expires after 5 seconds."""
     return {
@@ -60,7 +60,7 @@ async def cache_expires() -> dict[str, Union[bool, str]]:
 
 
 @app.get("/cache_json_encoder")
-@cache()
+@cache(tag="test_tag_1")
 def cache_json_encoder() -> (
     dict[str, Union[bool, str, datetime, date, Decimal]]
 ):
@@ -77,7 +77,7 @@ def cache_json_encoder() -> (
 
 
 @app.get("/cache_one_hour")
-@cache_one_hour()
+@cache_one_hour(tag="test_tag_2")
 def partial_cache_one_hour(response: Response) -> dict[str, Union[bool, str]]:
     """Route where the cache expires after one hour."""
     return {

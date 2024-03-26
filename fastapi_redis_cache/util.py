@@ -1,5 +1,7 @@
 """Define utility functions for the fastapi_redis_cache package."""
 
+from __future__ import annotations
+
 import json
 from datetime import date, datetime
 from decimal import Decimal
@@ -78,3 +80,8 @@ def serialize_json(json_dict: dict[str, Any]) -> str:
 def deserialize_json(json_str: str) -> Any:  # noqa: ANN401
     """Deserialize a JSON string to a dictionary."""
     return json.loads(json_str, object_hook=object_hook)
+
+
+def get_tag_from_key(key: str) -> str | None:
+    """Return the tag from the key or None if not found."""
+    return key.split("::")[-1] if "::" in key else None
