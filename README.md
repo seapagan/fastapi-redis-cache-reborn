@@ -326,9 +326,10 @@ def get_user(id: int, db: Session = Depends(get_db)):
     return db.query(models.User).filter(models.User.id == id).first()
 ```
 
-In the [Initialize Redis](#initialize-redis) section of this document, the
-`FastApiRedisCache.init` method was called with `ignore_arg_types=[Request,
-Response, Session]`. Why is it necessary to include `Session` in this list?
+In the [Initialize Redis](#initialize-redis-in-your-fastapi-application) section
+of this document, the `FastApiRedisCache.init` method was called with
+`ignore_arg_types=[Request, Response, Session]`. Why is it necessary to include
+`Session` in this list?
 
 Before we can answer that question, we must understand how a cache key is
 created. If the following request was received: `GET /get_user?id=1`, the cache
