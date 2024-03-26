@@ -81,10 +81,22 @@ There is a `docker-compose-redis-only.yml` file in the root of this repository
 that you can use to start a Redis server locally. Just run:
 
 ```bash
-docker compose -f docker-compose-redis-only.yml u
+docker compose -f docker-compose-redis-only.yml up -d
 ```
 
-This will start a Redis server on `localhost:6379`, without any password.
+This will spin up a Redis server on `localhost:6379`, without any password,
+running in the background. You can stop it with:
+
+```bash
+docker compose -f docker-compose-redis-only.yml down
+```
+
+The image is based on
+[redis/redis-stack](https://redis.io/docs/install/install-stack/docker/) so also
+includes [RedisInsight](https://redis.io/docs/connect/insight/) running on port
+`8001` that you can use to inspect the Redis server.
+
+**Note that this is a development server and should not be used in production.**
 
 ### Initialize Redis in your FastAPI application
 
