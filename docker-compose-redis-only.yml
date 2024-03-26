@@ -1,11 +1,10 @@
-version: "3.8"
 services:
   cache:
-    image: redis:7.2-alpine
+    image: redis/redis-stack:latest
     restart: always
     ports:
       - "6379:6379"
-    command: redis-server --save 20 1
+      - "8001:8001"
     volumes:
       - cache:/data
 volumes:
