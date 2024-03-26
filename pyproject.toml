@@ -30,7 +30,7 @@ fastapi = { extras = ["all"], version = "^0.110.0" }
 [tool.poetry.group.dev.dependencies]
 requests = "^2.31.0"
 fakeredis = "^2.21.3"
-faker = "^24.2.0"
+faker = "^24.4.0"
 mock = "^5.1.0"
 pyfakefs = "^5.3.5"
 pytest = "^8.1.1"
