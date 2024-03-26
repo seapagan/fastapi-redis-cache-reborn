@@ -28,6 +28,9 @@ def get_cache_key(  # noqa: D417
     Args:
         prefix (`str`): Customizable namespace value that will prefix all cache
             keys.
+        tag (`str`): Customizable tag value that will be inserted into the
+            cache key. This can be used to group related keys together or to
+            help expire a key in other routes.
         ignore_arg_types (`list[ArgType]`): Each argument to the API endpoint
             function is used to compose the cache key by calling `str(arg)`. If
             there are any keys that should not be used in this way (i.e.,
@@ -45,13 +48,13 @@ def get_cache_key(  # noqa: D417
     ignore_arg_types.extend(ALWAYS_IGNORE_ARG_TYPES)
     ignore_arg_types = list(set(ignore_arg_types))
     prefix = f"{prefix}:" if prefix else ""
-    tag_string = f"^{tag}^" if tag else ""
+    tag_string = f"::{tag}" if tag else ""
 
     sig = signature(func)
     sig_params = sig.parameters
     func_args = get_func_args(sig, *args, **kwargs)
     args_str = get_args_str(sig_params, func_args, ignore_arg_types)
-    return f"{prefix}{tag_string}{func.__module__}.{func.__name__}({args_str})"
+    return f"{prefix}{func.__module__}.{func.__name__}({args_str}){tag_string}"
 
 
 def get_func_args(
