@@ -22,6 +22,7 @@ def redis_connect(host_url: str) -> RedisConnectType:
 
 
 def _connect(host_url: str) -> RedisConnectType:
+    """Connect and return a Redis client instance."""
     try:
         redis_client = redis.from_url(host_url)
         if redis_client.ping():
@@ -35,6 +36,5 @@ def _connect(host_url: str) -> RedisConnectType:
 
 
 def _connect_fake() -> tuple[RedisStatus, FakeRedis]:
-    from fakeredis import FakeRedis
-
+    """Return a FakeRedis instance for testing purposes."""
     return (RedisStatus.CONNECTED, FakeRedis())
