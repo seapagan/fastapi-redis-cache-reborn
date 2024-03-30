@@ -63,3 +63,13 @@ def cache_invalid_type(request: Request, response: Response) -> logging.Logger:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     return logger
+
+
+@app.get("/cache_with_args/{user}")
+@cache_one_hour(tag="user_tag")
+def cache_with_args(user: int) -> dict[str, Union[bool, str]]:
+    """Have a varying cache key based on the user argument."""
+    return {
+        "success": True,
+        "message": f"this data is for user {user}",
+    }
