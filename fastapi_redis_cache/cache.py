@@ -127,6 +127,37 @@ def cache(
     return outer_wrapper
 
 
+def expires(tag: str | None = None) -> Callable[..., Any]:
+    """Invalidate all cached responses with the same tag.
+
+    Args:
+        tag (str, optional): A tag to associate with the cached response. This
+            can later be used to invalidate all cached responses with the same
+            tag, or for further fine-grained cache expiry. Defaults to None.
+    """
+
+    def outer_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        async def inner_wrapper(
+            *args: Any,  # noqa: ANN401
+            **kwargs: Any,  # noqa: ANN401
+        ) -> Any:  # noqa: ANN401
+            """Invalidate all cached responses with the same tag."""
+            redis_cache = FastApiRedisCache()
+            if redis_cache.not_connected:
+                return await get_api_response_async(func, *args, **kwargs)
+            if tag:
+                # expire all keys with the same tag. This is a test we will
+                # later only expire keys that have the search argument in the
+                # key.
+                pass
+            return await get_api_response_async(func, *args, **kwargs)
+
+        return inner_wrapper
+
+    return outer_wrapper
+
+
 async def get_api_response_async(
     func: Callable[..., Any],
     *args: Any,  # noqa: ANN401
