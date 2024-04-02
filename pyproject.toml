@@ -25,7 +25,7 @@ classifiers = [
 python = "^3.9"
 pydantic = "^2.6.4"
 redis = "^5.0.3"
-fastapi = { extras = ["all"], version = "^0.110.0" }
+fastapi = { extras = ["all"], version = "^0.110.1" }
 
 [tool.poetry.group.dev.dependencies]
 requests = "^2.31.0"
