@@ -8,6 +8,7 @@ from fastapi_redis_cache.cache import (
     cache_one_month,
     cache_one_week,
     cache_one_year,
+    expires,
 )
 from fastapi_redis_cache.client import FastApiRedisCache
 
@@ -19,5 +20,6 @@ __all__ = [
     "cache_one_month",
     "cache_one_week",
     "cache_one_year",
+    "expires",
     "FastApiRedisCache",
 ]
