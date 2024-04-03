@@ -19,6 +19,7 @@ from fastapi_redis_cache import (
     cache,
     cache_one_hour,
     cache_one_minute,
+    expires,
 )
 
 REDIS_SERVER_URL = "redis://127.0.0.1:"
@@ -103,4 +104,14 @@ def cache_with_args(user: int) -> dict[str, Union[bool, str]]:
     return {
         "success": True,
         "message": f"this data is for user {user}",
+    }
+
+
+@app.put("/cache_with_args/{user}")
+@expires(tag="user_tag")
+def put_cache_with_args(user: int) -> dict[str, Union[bool, str]]:
+    """Put request to change data for a specific user."""
+    return {
+        "success": True,
+        "message": f"New data for User {user}",
     }

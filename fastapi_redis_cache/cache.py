@@ -127,13 +127,19 @@ def cache(
     return outer_wrapper
 
 
-def expires(tag: str | None = None) -> Callable[..., Any]:
+def expires(
+    tag: str | None = None,
+    arg: str | None = None,  # noqa: ARG001
+) -> Callable[..., Any]:
     """Invalidate all cached responses with the same tag.
 
     Args:
-        tag (str, optional): A tag to associate with the cached response. This
-            can later be used to invalidate all cached responses with the same
-            tag, or for further fine-grained cache expiry. Defaults to None.
+        tag (str, optional): The tag to search for keys to expire.
+            Defaults to None.
+        arg: (str, optional): The function arguement to filter for expiry. This
+            would generally be the varying arguement suppplied to the route.
+            Defaults to None. If not specified, the kwargs for the route will
+            be used to search for the key to expire.
     """
 
     def outer_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -144,14 +150,26 @@ def expires(tag: str | None = None) -> Callable[..., Any]:
         ) -> Any:  # noqa: ANN401
             """Invalidate all cached responses with the same tag."""
             redis_cache = FastApiRedisCache()
-            if redis_cache.not_connected:
-                return await get_api_response_async(func, *args, **kwargs)
-            if tag:
-                # expire all keys with the same tag. This is a test we will
-                # later only expire keys that have the search argument in the
-                # key.
+            orig_response = await get_api_response_async(func, *args, **kwargs)
+
+            if not redis_cache.redis or not redis_cache.connected or not tag:
+                # we only want to invalidate the cache if the redis client is
+                # connected and a tag is provided.
+                return orig_response
+            if kwargs:
+                search = "".join(
+                    [f"({key}={value})" for key, value in kwargs.items()]
+                )
+                tag_keys = redis_cache.get_tagged_keys(tag)
+                found_keys = [key for key in tag_keys if search.encode() in key]
+                for key in found_keys:
+                    redis_cache.redis.delete(key)
+                    redis_cache.redis.srem(tag, key)
+            else:
+                # will fill this later, what to do if no kwargs are provided
                 pass
-            return await get_api_response_async(func, *args, **kwargs)
+
+            return orig_response
 
         return inner_wrapper
 
