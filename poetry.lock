@@ -1469,13 +1469,13 @@ dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [[package]]
 name = "pytest-order"
-version = "1.2.0"
+version = "1.2.1"
 description = "pytest plugin to run your tests in a specific order"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pytest-order-1.2.0.tar.gz", hash = "sha256:944f86b6d441aa7b1da80f801c6ab65b84bbeba472d0a7a12eb43ba26650101a"},
-    {file = "pytest_order-1.2.0-py3-none-any.whl", hash = "sha256:9d65c3b6dc6d6ee984d6ae2c6c4aa4f1331e5b915116219075c888c8bcbb93b8"},
+    {file = "pytest-order-1.2.1.tar.gz", hash = "sha256:4451bd8821ba4fa2109455a2fcc882af60ef8e53e09d244d67674be08f56eac3"},
+    {file = "pytest_order-1.2.1-py3-none-any.whl", hash = "sha256:c3082fc73f9ddcf13e4a22dda9bbcc2f39865bf537438a1d50fa241e028dd743"},
 ]
 
 [package.dependencies]
@@ -2480,4 +2480,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "aab03d8970d658a6c91f99331bc352e721a5f6ef5fb84089806aff00a2293707"
+content-hash = "cb8a400486ccd029346afdd6b3481579f9b839177fa6fcf294ff1503da353493"
