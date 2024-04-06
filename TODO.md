@@ -8,6 +8,8 @@ These below are from Issues or PRs in the original repository.
   (<https://github.com/a-luna/fastapi-redis-cache/issues/63>)
 - Add support for caching non-FastAPI functions
   (<https://github.com/a-luna/fastapi-redis-cache/pull/66>)
+- Add functionality for specifying a web cache expiration
+  (<https://github.com/a-luna/fastapi-redis-cache/pull/60>)
 - Take a look at other issues in the original repository to see if any need to
   be added here.
 
