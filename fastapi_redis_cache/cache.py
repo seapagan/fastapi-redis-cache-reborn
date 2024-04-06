@@ -54,6 +54,7 @@ def cache(
             request = func_kwargs.pop("request", None)
             response = func_kwargs.pop("response", None)
             create_response_directly = not response
+
             if create_response_directly:
                 response = Response()
                 # below fix by @jaepetto on the original repo.
@@ -149,6 +150,8 @@ def expires(
             **kwargs: Any,  # noqa: ANN401
         ) -> Any:  # noqa: ANN401
             """Invalidate all cached responses with the same tag."""
+            _headers = kwargs.get("request", None).headers
+
             redis_cache = FastApiRedisCache()
             orig_response = await get_api_response_async(func, *args, **kwargs)
 
