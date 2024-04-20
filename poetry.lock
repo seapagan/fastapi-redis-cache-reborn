@@ -521,13 +521,13 @@ probabilistic = ["pyprobables (>=0.6,<0.7)"]
 
 [[package]]
 name = "fastapi"
-version = "0.110.1"
+version = "0.110.2"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "fastapi-0.110.1-py3-none-any.whl", hash = "sha256:5df913203c482f820d31f48e635e022f8cbfe7350e4830ef05a3163925b1addc"},
-    {file = "fastapi-0.110.1.tar.gz", hash = "sha256:6feac43ec359dfe4f45b2c18ec8c94edb8dc2dfc461d417d9e626590c071baad"},
+    {file = "fastapi-0.110.2-py3-none-any.whl", hash = "sha256:239403f2c0a3dda07a9420f95157a7f014ddb2b770acdbc984f9bdf3ead7afdb"},
+    {file = "fastapi-0.110.2.tar.gz", hash = "sha256:b53d673652da3b65e8cd787ad214ec0fe303cad00d2b529b86ce7db13f17518d"},
 ]
 
 [package.dependencies]
@@ -2480,4 +2480,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6c993622af8f6c2f8d049c1e1d0b4fee2e0cebc8ba1c61b4e2d22f6bb3fd137c"
+content-hash = "9163039e4a49989f6dec7c167a184d7bbd58f7c2671400dd0ba05884ea84abde"
