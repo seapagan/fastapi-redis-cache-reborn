@@ -45,7 +45,7 @@ pytest-sugar = "^1.0.0"
 pytest-watcher = "^0.4.2"
 mypy = "^1.9.0"
 pre-commit = "^3.7.0"
-ruff = "^0.4.1"
+ruff = "^0.4.2"
 poethepoet = "^0.25.1"
 pymarkdownlnt = "^0.9.17"
 
