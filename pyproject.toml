@@ -23,7 +23,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pydantic = "^2.7.0"
+pydantic = "^2.7.1"
 redis = "^5.0.4"
 fastapi = { extras = ["all"], version = "^0.110.2" }
 
