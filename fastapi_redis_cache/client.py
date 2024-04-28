@@ -206,7 +206,9 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             message = f"Object of type {type(value)} is not JSON-serializable"
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, msg=message, key=key)
             return False
+
         cached = self.redis.set(name=key, value=response_data, ex=expire)
+
         if not cached:
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, key=key, value=value)
             return False
