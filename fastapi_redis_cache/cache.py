@@ -11,6 +11,7 @@ from typing import Any, Callable, Union
 from fastapi import Response
 
 from fastapi_redis_cache.client import FastApiRedisCache
+from fastapi_redis_cache.enums import RedisEvent
 from fastapi_redis_cache.util import (
     ONE_DAY_IN_SECONDS,
     ONE_HOUR_IN_SECONDS,
@@ -69,6 +70,7 @@ def cache(
                 # if the redis client is not connected or request is not
                 # cacheable, no caching behavior is performed.
                 return await get_api_response_async(func, *args, **kwargs)
+
             key = redis_cache.get_cache_key(tag, func, *args, **kwargs)
             ttl, in_cache = redis_cache.check_cache(key)
             if in_cache:
@@ -150,29 +152,45 @@ def expires(
             **kwargs: Any,  # noqa: ANN401
         ) -> Any:  # noqa: ANN401
             """Invalidate all cached responses with the same tag."""
-            _headers = kwargs.get("request", None).headers
+            response = kwargs.get("response", None)
+            create_response_directly = not response
+
+            if create_response_directly:
+                response = Response()
+                if "content-length" in response.headers:
+                    del response.headers["content-length"]
 
             redis_cache = FastApiRedisCache()
             orig_response = await get_api_response_async(func, *args, **kwargs)
 
-            if not redis_cache.redis or not redis_cache.connected or not tag:
-                # we only want to invalidate the cache if the redis client is
-                # connected and a tag is provided.
-                return orig_response
-            if kwargs:
+            ignore_args = redis_cache.ignore_arg_types
+
+            if all([redis_cache.redis, redis_cache.connected, tag, kwargs]):
+                # remove any args that should not be used to generate the cache
+                # key.
+                filtered_kwargs = kwargs.copy()
+                for arg in ignore_args:
+                    filtered_kwargs.pop(arg, None)
                 search = "".join(
-                    [f"({key}={value})" for key, value in kwargs.items()]
+                    [
+                        f"({key}={value})"
+                        for key, value in filtered_kwargs.items()
+                    ]
                 )
                 tag_keys = redis_cache.get_tagged_keys(tag)
                 found_keys = [key for key in tag_keys if search.encode() in key]
                 for key in found_keys:
+                    redis_cache.log(
+                        RedisEvent.KEY_DELETED_FROM_CACHE, key=key.decode()
+                    )
                     redis_cache.redis.delete(key)
                     redis_cache.redis.srem(tag, key)
-            else:
-                # will fill this later, what to do if no kwargs are provided
-                pass
 
-            return orig_response
+            return Response(
+                content=serialize_json(orig_response),
+                media_type=JSON_MEDIA_TYPE,
+                headers=response.headers,
+            )
 
         return inner_wrapper
 

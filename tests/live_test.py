@@ -99,7 +99,7 @@ def cache_invalid_type(request: Request, response: Response) -> logging.Logger:
 
 @app.get("/cache_with_args/{user}")
 @cache_one_hour(tag="user_tag")
-def cache_with_args(user: int, request: Request) -> dict[str, Union[bool, str]]:
+def cache_with_args(user: int) -> dict[str, Union[bool, str]]:
     """Have a varying cache key based on the user argument."""
     return {
         "success": True,
@@ -109,9 +109,7 @@ def cache_with_args(user: int, request: Request) -> dict[str, Union[bool, str]]:
 
 @app.put("/cache_with_args/{user}")
 @expires(tag="user_tag")
-def put_cache_with_args(
-    user: int, request: Request
-) -> dict[str, Union[bool, str]]:
+def put_cache_with_args(user: int) -> dict[str, Union[bool, str]]:
     """Put request to change data for a specific user."""
     return {
         "success": True,
