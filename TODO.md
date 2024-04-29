@@ -29,3 +29,6 @@ These below are from Issues or PRs in the original repository.
   preferred local time format.
 - catch invalid cache type exceptions and just return a normal response
   instead of raising Internal Server (500) error
+- use Async connections now that redis-py is async.
+- add the `hiredis` module to the requirements, this is a C extension that
+  should speed up the connection to Redis (ensure no issues with current code).
