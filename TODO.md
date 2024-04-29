@@ -24,3 +24,6 @@ These below are from Issues or PRs in the original repository.
   the test logic not production code.
 - catch invalid cache type exceptions and raise a more informative error
   message.
+- use Async connections now that redis-py is async.
+- add the `hiredis` module to the requirements, this is a C extension that
+  should speed up the connection to Redis (ensure no issues with current code).
