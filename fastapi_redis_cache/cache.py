@@ -165,12 +165,14 @@ def expires(
 
             ignore_args = redis_cache.ignore_arg_types
 
-            if all([redis_cache.redis, redis_cache.connected, tag, kwargs]):
+            if redis_cache.redis and redis_cache.connected and tag and kwargs:
                 # remove any args that should not be used to generate the cache
                 # key.
                 filtered_kwargs = kwargs.copy()
-                for arg in ignore_args:
-                    filtered_kwargs.pop(arg, None)
+                for key in list(filtered_kwargs.keys()):
+                    if type(filtered_kwargs[key]) in ignore_args:
+                        del filtered_kwargs[key]
+                # create the search string to find the keys to expire.
                 search = "".join(
                     [
                         f"({key}={value})"
@@ -179,12 +181,18 @@ def expires(
                 )
                 tag_keys = redis_cache.get_tagged_keys(tag)
                 found_keys = [key for key in tag_keys if search.encode() in key]
-                for key in found_keys:
-                    redis_cache.log(
-                        RedisEvent.KEY_DELETED_FROM_CACHE, key=key.decode()
+                for this_key in found_keys:
+                    key_str = (
+                        this_key.decode()
+                        if isinstance(this_key, bytes)
+                        else this_key
                     )
-                    redis_cache.redis.delete(key)
-                    redis_cache.redis.srem(tag, key)
+
+                    redis_cache.log(
+                        RedisEvent.KEY_DELETED_FROM_CACHE, key=str(key_str)
+                    )
+                    redis_cache.redis.delete(key_str)
+                    redis_cache.redis.srem(tag, key_str)
 
             return Response(
                 content=serialize_json(orig_response),
