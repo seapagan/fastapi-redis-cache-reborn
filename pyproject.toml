@@ -46,7 +46,7 @@ pytest-watcher = "^0.4.2"
 mypy = "^1.10.0"
 pre-commit = "^3.7.0"
 ruff = "^0.4.2"
-poethepoet = "^0.25.1"
+poethepoet = "^0.26.0"
 pymarkdownlnt = "^0.9.17"
 
 # needed for mupy typing
