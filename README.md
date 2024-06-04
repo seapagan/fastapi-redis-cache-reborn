@@ -162,7 +162,7 @@ other arguments are optional:
     project uses SQLAlchemy as a dependency ([as demonstrated in the FastAPI
     docs](https://fastapi.tiangolo.com/tutorial/sql-databases/)), you should
     include `Session` in `ignore_arg_types` in order for cache keys to be
-    created correctly ([More info](#cache-keys)).
+    created correctly ([More info][cache-keys]).
 
 ### `@cache` Decorator
 
