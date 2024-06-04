@@ -8,8 +8,7 @@ readme = "README.md"
 packages = [{ include = "fastapi_redis_cache", from = "." }]
 
 repository = "https://github.com/seapagan/fastapi-redis-cache-reborn"
-documentation = "https://github.com/seapagan/fastapi-redis-cache-reborn"
-homepage = "https://pypi.org/project/fastapi-redis-cache-reborn/"
+documentation = "https://seapagan.github.io/fastapi-redis-cache-reborn/"
 
 classifiers = [
   "Development Status :: 4 - Beta",
