@@ -1,4 +1,4 @@
-# Contributing to the FastAPI Template
+# Contributing to the Project
 
 Thank you for your interest in contributing to `fastapi-redis-cache-reborn`! We
 welcome all contributions, big or small.
