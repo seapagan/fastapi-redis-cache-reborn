@@ -131,6 +131,8 @@ changelog.help = "Generate the CHANGELOG.md file"
 plugins.md014.enabled = false
 plugins.md046.enabled = false
 plugins.md013.enabled = false
+plugins.md040.enabled = false
+plugins.md041.enabled = false
 
 [tool.ruff]
 line-length = 80
