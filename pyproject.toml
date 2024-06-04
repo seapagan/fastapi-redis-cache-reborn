@@ -7,8 +7,8 @@ license = "MIT"
 readme = "README.md"
 packages = [{ include = "fastapi_redis_cache", from = "." }]
 
-changelog = "https://github.com/seapagan/fastapi-redis-cache-reborn/blob/main/CHANGELOG.md"
 repository = "https://github.com/seapagan/fastapi-redis-cache-reborn"
+documentation = "https://github.com/seapagan/fastapi-redis-cache-reborn"
 homepage = "https://pypi.org/project/fastapi-redis-cache-reborn/"
 
 classifiers = [
@@ -25,6 +25,11 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: FastAPI",
 ]
+
+[tool.poetry.urls]
+"Pull Requests" = "https://github.com/seapagan/fastapi-redis-cache-reborn/pulls"
+"Bug Tracker" = "https://github.com/seapagan/fastapi-redis-cache-reborn/issues"
+"changelog" = "https://github.com/seapagan/fastapi-redis-cache-reborn/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
