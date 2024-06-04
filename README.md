@@ -1,10 +1,12 @@
 # fastapi-redis-cache-reborn <!-- omit in toc -->
 
-<!-- [![PyPI version](https://badge.fury.io/py/fastapi-redis-cache-reborn.svg)](https://badge.fury.io/py/fastapi-redis-cache-reborn)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-redis-cache?color=%234DC71F)
-![PyPI - License](https://img.shields.io/pypi/l/fastapi-redis-cache?color=%25234DC71F)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fastapi-redis-cache)
--->
+![PyPI - Version](https://img.shields.io/pypi/v/fastapi-redis-cache-reborn)
+![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/fastapi-redis-cache-reborn)
+[![Tests](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/tests.yml/badge.svg)](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/tests.yml)
+[![Linting](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/ruff.yml/badge.svg)](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/ruff.yml)
+[![Type Checking](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/mypy.yml/badge.svg)](https://github.com/seapagan/fastapi-redis-cache-reborn/actions/workflows/mypy.yml)
+![PyPI - License](https://img.shields.io/pypi/l/fastapi-redis-cache-reborn?color=%25234DC71F)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-redis-cache-reborn?color=%234DC71F)
 
 - [Migrating from `fastapi-redis-cache`](#migrating-from-fastapi-redis-cache)
 - [Features](#features)
