@@ -201,7 +201,7 @@ def get_dynamic_data(request: Request, response: Response):
     return {"success": True, "message": "this data should only be cached temporarily"}
 ```
 
-[!NOTE]
+> [!NOTE]
 > `expire` can be either an `int` value or `timedelta` object. When
 > the TTL is very short (like the example above) this results in a decorator
 > that is expressive and requires minimal effort to parse visually. For
@@ -255,7 +255,7 @@ def partial_cache_two_hours(response: Response):
     return {"success": True, "message": "this data should be cached for two hours"}
 ```
 
-[!TIP]
+> [!TIP]
 > Please read the full documentation on the [website][website] for more
 > information on the `@cache` decorator and the pre-defined lifetimes.
 > There is also a section on [cache keys][cache-keys] that explains how the
