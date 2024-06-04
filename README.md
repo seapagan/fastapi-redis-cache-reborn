@@ -8,6 +8,7 @@
 ![PyPI - License](https://img.shields.io/pypi/l/fastapi-redis-cache-reborn?color=%25234DC71F)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-redis-cache-reborn?color=%234DC71F)
 
+- [Documentation Site](#documentation-site)
 - [Migrating from `fastapi-redis-cache`](#migrating-from-fastapi-redis-cache)
 - [Features](#features)
 - [Installation](#installation)
@@ -15,11 +16,18 @@
   - [Redis Server](#redis-server)
   - [Initialize Redis in your FastAPI application](#initialize-redis-in-your-fastapi-application)
   - [`@cache` Decorator](#cache-decorator)
-    - [Response Headers](#response-headers)
     - [Pre-defined Lifetimes](#pre-defined-lifetimes)
-  - [Cache Keys](#cache-keys)
-  - [Cache Keys Pt 2](#cache-keys-pt-2)
 - [Questions/Contributions](#questionscontributions)
+
+## Documentation Site
+
+There is now a documentation site at
+<https://seapagan.github.io/fastapi-redis-cache-reborn/> that is generated from
+the `docs` folder in this repository. The site is built using
+[MkDocs](https://www.mkdocs.org/) and the [Material for
+MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. The documentation
+is a work in progress, but I will be adding more content as time goes on, and
+cutting down the README file to be more concise.
 
 ## Migrating from `fastapi-redis-cache`
 
@@ -179,23 +187,7 @@ async def get_immutable_data():
 
 Response data for the API endpoint at `/immutable_data` will be cached by the
 Redis server. Log messages are written to standard output whenever a response is
-added to or retrieved from the cache:
-
-```console
-INFO:fastapi_redis_cache:| 04/21/2021 12:26:26 AM | CONNECT_BEGIN: Attempting to connect to Redis server...
-INFO:fastapi_redis_cache:| 04/21/2021 12:26:26 AM | CONNECT_SUCCESS: Redis client is connected to server.
-INFO:fastapi_redis_cache:| 04/21/2021 12:26:34 AM | KEY_ADDED_TO_CACHE: key=api.get_immutable_data()
-INFO:     127.0.0.1:61779 - "GET /immutable_data HTTP/1.1" 200 OK
-INFO:fastapi_redis_cache:| 04/21/2021 12:26:45 AM | KEY_FOUND_IN_CACHE: key=api.get_immutable_data()
-INFO:     127.0.0.1:61779 - "GET /immutable_data HTTP/1.1" 200 OK
-```
-
-The log messages show two successful (**`200 OK`**) responses to the same
-request (**`GET /immutable_data`**). The first request executed the
-`get_immutable_data` function and stored the result in Redis under key
-`api.get_immutable_data()`. The second request _**did not**_ execute the
-`get_immutable_data` function, instead the cached result was retrieved and sent
-as the response.
+added to or retrieved from the cache.
 
 In most situations, response data must expire in a much shorter period of time
 than one year. Using the `expire` parameter, You can specify the number of
@@ -209,61 +201,13 @@ def get_dynamic_data(request: Request, response: Response):
     return {"success": True, "message": "this data should only be cached temporarily"}
 ```
 
-> **NOTE!** `expire` can be either an `int` value or `timedelta` object. When
+[!NOTE]
+> `expire` can be either an `int` value or `timedelta` object. When
 > the TTL is very short (like the example above) this results in a decorator
 > that is expressive and requires minimal effort to parse visually. For
 > durations an hour or longer (e.g., `@cache(expire=86400)`), IMHO, using a
 > `timedelta` object is much easier to grok
 > (`@cache(expire=timedelta(days=1))`).
-
-#### Response Headers
-
-A response from the `/dynamic_data` endpoint showing all header values is given
-below:
-
-```console
-$ http "http://127.0.0.1:8000/dynamic_data"
-  HTTP/1.1 200 OK
-  cache-control: max-age=29
-  content-length: 72
-  content-type: application/json
-  date: Wed, 21 Apr 2021 07:54:33 GMT
-  etag: W/-5480454928453453778
-  expires: Wed, 21 Apr 2021 07:55:03 GMT
-  server: uvicorn
-  x-fastapi-cache: Hit
-
-  {
-      "message": "this data should only be cached temporarily",
-      "success": true
-  }
-```
-
-- The `x-fastapi-cache` header field indicates that this response was found in
-  the Redis cache (a.k.a. a `Hit`). The only other possible value for this field
-  is `Miss`.
-- The `expires` field and `max-age` value in the `cache-control` field indicate
-  that this response will be considered fresh for 29 seconds. This is expected
-  since `expire=30` was specified in the `@cache` decorator.
-- The `etag` field is an identifier that is created by converting the response
-  data to a string and applying a hash function. If a request containing the
-  `if-none-match` header is received, any `etag` value(s) included in the
-  request will be used to determine if the data requested is the same as the
-  data stored in the cache. If they are the same, a `304 NOT MODIFIED` response
-  will be sent. If they are not the same, the cached data will be sent with a
-  `200 OK` response.
-
-These header fields are used by your web browser's cache to avoid sending
-unnecessary requests. After receiving the response shown above, if a user
-requested the same resource before the `expires` time, the browser wouldn't send
-a request to the FastAPI server. Instead, the cached response would be served
-directly from disk.
-
-Of course, this assumes that the browser is configured to perform caching. If
-the browser sends a request with the `cache-control` header containing
-`no-cache` or `no-store`, the `cache-control`, `etag`, `expires`, and
-`x-fastapi-cache` response header fields will not be included and the response
-data will not be stored in Redis.
 
 #### Pre-defined Lifetimes
 
@@ -311,139 +255,11 @@ def partial_cache_two_hours(response: Response):
     return {"success": True, "message": "this data should be cached for two hours"}
 ```
 
-### Cache Keys
-
-Consider the `/get_user` API route defined below. This is the first path
-function we have seen where the response depends on the value of an argument
-(`id: int`). This is a typical CRUD operation where `id` is used to retrieve a
-`User` record from a database. The API route also includes a dependency that
-injects a `Session` object (`db`) into the function, [per the instructions from
-the FastAPI
-docs](https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-dependency):
-
-```python
-@app.get("/get_user", response_model=schemas.User)
-@cache(expire=3600)
-def get_user(id: int, db: Session = Depends(get_db)):
-    return db.query(models.User).filter(models.User.id == id).first()
-```
-
-In the [Initialize Redis](#initialize-redis-in-your-fastapi-application) section
-of this document, the `FastApiRedisCache.init` method was called with
-`ignore_arg_types=[Request, Response, Session]`. Why is it necessary to include
-`Session` in this list?
-
-Before we can answer that question, we must understand how a cache key is
-created. If the following request was received: `GET /get_user?id=1`, the cache
-key generated would be `myapi-cache:api.get_user(id=1)`.
-
-The source of each value used to construct this cache key is given below:
-
-1) The optional `prefix` value provided as an argument to the
-   `FastApiRedisCache.init` method => `"myapi-cache"`.
-2) The module containing the path function => `"api"`.
-3) The name of the path function => `"get_user"`.
-4) The name and value of all arguments to the path function **EXCEPT for
-   arguments with a type that exists in** `ignore_arg_types` => `"id=1"`.
-
-Since `Session` is included in `ignore_arg_types`, the `db` argument was not
-included in the cache key when **Step 4** was performed.
-
-If `Session` had not been included in `ignore_arg_types`, caching would be
-completely broken. To understand why this is the case, see if you can figure out
-what is happening in the log messages below:
-
-```console
-INFO:uvicorn.error:Application startup complete.
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:12 PM | KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11b9fe550>)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:15 PM | KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11c7f73a0>)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:17 PM | KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11c7e35e0>)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-```
-
-The log messages indicate that three requests were received for the same
-endpoint, with the same arguments (`GET /get_user?id=1`). However, the cache key
-that is created is different for each request:
-
-```console
-KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11b9fe550>
-KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11c7f73a0>
-KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1,db=<sqlalchemy.orm.session.Session object at 0x11c7e35e0>
-```
-
-The value of each argument is added to the cache key by calling `str(arg)`. The
-`db` object includes the memory location when converted to a string, causing the
-same response data to be cached under three different keys! This is obviously
-not what we want.
-
-The correct behavior (with `Session` included in `ignore_arg_types`) is shown
-below:
-
-```console
-INFO:uvicorn.error:Application startup complete.
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:12 PM | KEY_ADDED_TO_CACHE: key=myapi-cache:api.get_user(id=1)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:12 PM | KEY_FOUND_IN_CACHE: key=myapi-cache:api.get_user(id=1)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-INFO:fastapi_redis_cache.client: 04/23/2021 07:04:12 PM | KEY_FOUND_IN_CACHE: key=myapi-cache:api.get_user(id=1)
-INFO:     127.0.0.1:50761 - "GET /get_user?id=1 HTTP/1.1" 200 OK
-```
-
-Now, every request for the same `id` generates the same key value
-(`myapi-cache:api.get_user(id=1)`). As expected, the first request adds the
-key/value pair to the cache, and each subsequent request retrieves the value
-from the cache based on the key.
-
-### Cache Keys Pt 2
-
-What about this situation? You create a custom dependency for your API that
-performs input validation, but you can't ignore it because _**it does**_ have an
-effect on the response data. There's a simple solution for that, too.
-
-Here is an endpoint from one of my projects:
-
-```python
-@router.get("/scoreboard", response_model=ScoreboardSchema)
-@cache()
-def get_scoreboard_for_date(
-    game_date: MLBGameDate = Depends(), db: Session = Depends(get_db)
-):
-    return get_scoreboard_data_for_date(db, game_date.date)
-```
-
-The `game_date` argument is a `MLBGameDate` type. This is a custom type that
-parses the value from the querystring to a date, and determines if the parsed
-date is valid by checking if it is within a certain range. The implementation
-for `MLBGameDate` is given below:
-
-```python
-class MLBGameDate:
-    def __init__(
-        self,
-        game_date: str = Query(..., description="Date as a string in YYYYMMDD format"),
-        db: Session = Depends(get_db),
-    ):
-        try:
-            parsed_date = parse_date(game_date)
-        except ValueError as ex:
-            raise HTTPException(status_code=400, detail=ex.message)
-        result = Season.is_date_in_season(db, parsed_date)
-        if result.failure:
-            raise HTTPException(status_code=400, detail=result.error)
-        self.date = parsed_date
-        self.season = convert_season_to_dict(result.value)
-
-    def __str__(self):
-        return self.date.strftime("%Y-%m-%d")
-```
-
-Please note the `__str__` method that overrides the default behavior. This way,
-instead of `<MLBGameDate object at 0x11c7e35e0>`, the value will be formatted
-as, for example, `2019-05-09`. You can use this strategy whenever you have an
-argument that has en effect on the response data but converting that argument to
-a string results in a value containing the object's memory location.
+[!TIP]
+> Please read the full documentation on the [website][website] for more
+> information on the `@cache` decorator and the pre-defined lifetimes.
+> There is also a section on [cache keys][cache-keys] that explains how the
+> cache keys are generated and how to use them properly.
 
 ## Questions/Contributions
 
@@ -451,3 +267,6 @@ If you have any questions, please open an issue. Any suggestions and
 contributions are absolutely welcome. This is still a very small and young
 project, I plan on adding a feature roadmap and further documentation in the
 near future.
+
+[website]: https://seapagan.github.io/fastapi-redis-cache-reborn/
+[cache-keys]: https://seapagan.github.io/fastapi-redis-cache-reborn/usage/#cache-keys
