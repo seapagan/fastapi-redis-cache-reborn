@@ -38,6 +38,16 @@ redis = "^5.0.4"
 fastapi = { extras = ["all"], version = ">=0.110.2,<0.112.0" }
 
 [tool.poetry.group.dev.dependencies]
+# linting etc
+mypy = "^1.10.0"
+pre-commit = "^3.7.0"
+ruff = "^0.4.2"
+pymarkdownlnt = "^0.9.17"
+
+# task runner
+poethepoet = ">=0.25.1,<0.27.0"
+
+# testing
 requests = "^2.31.0"
 fakeredis = "^2.22.0"
 faker = ">=24.14,<26.0"
@@ -53,18 +63,23 @@ pytest-randomly = "^3.15.0"
 pytest-reverse = "^1.7.0"
 pytest-sugar = "^1.0.0"
 pytest-watcher = "^0.4.2"
-mypy = "^1.10.0"
-pre-commit = "^3.7.0"
-ruff = "^0.4.2"
-poethepoet = ">=0.25.1,<0.27.0"
-pymarkdownlnt = "^0.9.17"
+
+# documentation
+github-changelog-md = "^0.9.3"
+mkdocs = "^1.5.3"
+mkdocs-autorefs = "^1.0.1"
+mkdocs-material = "^9.5.12"
+mkdocs-git-revision-date-localized-plugin = "^1.2.4"
+mkdocs-latest-git-tag-plugin = "^0.1.2"
+mkdocs-minify-plugin = ">=0.8.0"
+mkdocstrings = ">=0.24.1"
+pymdown-extensions = "^10.7"
+pygments = "^2.17.2"
 
 # needed for mupy typing
 types-python-dateutil = "^2.9.0.20240316"
 types-redis = "^4.6.0.20240425"
 
-# changelog generation
-github-changelog-md = "^0.9.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -92,6 +107,16 @@ test.cmd = "pytest"
 "test:integration".cmd = "pytest -m integration"
 "test:skipped".cmd = "pytest --quiet --collect-only -m skip --no-cov"
 "test:skipped".help = "Show skipped tests without running all tests"
+
+# tasks to deal with documentation
+"docs:publish".cmd = "mkdocs gh-deploy"
+"docs:publish".help = "Publish documentation to GitHub Pages"
+"docs:build".cmd = "mkdocs build"
+"docs:build".help = "Build documentation locally to './site' folder"
+"docs:serve".cmd = "mkdocs serve -w TODO.md -w CHANGELOG.md -w CONTRIBUTING.md"
+"docs:serve".help = "Serve documentation locally"
+"docs:serve:all".cmd = "mkdocs serve -w TODO.md -w CHANGELOG.md -w CONTRIBUTING.md -a 0.0.0.0:9000"
+"docs:serve:all".help = "Serve documentation locally on all interfaces"
 
 # run all linting checks in sequence. we want to run them all, even if one fails
 lint.ignore_fail = "return_non_zero"
