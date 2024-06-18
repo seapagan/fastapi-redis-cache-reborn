@@ -25,3 +25,5 @@ These below are from Issues or PRs in the original repository.
 - configure the log time display format in the `Cache` class. Make it
   totally configurable through an optional parameter and/or detect and use the
   preferred local time format.
+- catch invalid cache type exceptions and just return a normal response
+  instead of raising Internal Server (500) error
