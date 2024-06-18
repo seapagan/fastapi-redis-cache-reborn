@@ -12,7 +12,8 @@ from typing import (
     Optional,
     Union,
 )
-from zoneinfo import ZoneInfo
+
+import tzlocal
 
 from fastapi_redis_cache.enums import RedisEvent, RedisStatus
 from fastapi_redis_cache.key_gen import get_cache_key
@@ -261,5 +262,5 @@ class FastApiRedisCache(metaclass=MetaSingleton):
     @staticmethod
     def get_log_time() -> str:
         """Get a timestamp to include with a log message."""
-        local_tz = ZoneInfo("localtime")
+        local_tz = tzlocal.get_localzone()
         return datetime.now(local_tz).strftime(LOG_TIMESTAMP)
