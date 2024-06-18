@@ -2449,6 +2449,17 @@ files = [
 ]
 
 [[package]]
+name = "types-pytz"
+version = "2024.1.0.20240417"
+description = "Typing stubs for pytz"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-pytz-2024.1.0.20240417.tar.gz", hash = "sha256:6810c8a1f68f21fdf0f4f374a432487c77645a0ac0b31de4bf4690cf21ad3981"},
+    {file = "types_pytz-2024.1.0.20240417-py3-none-any.whl", hash = "sha256:8335d443310e2db7b74e007414e74c4f53b67452c0cb0d228ca359ccfba59659"},
+]
+
+[[package]]
 name = "types-redis"
 version = "4.6.0.20240425"
 description = "Typing stubs for redis"
@@ -2462,6 +2473,20 @@ files = [
 [package.dependencies]
 cryptography = ">=35.0.0"
 types-pyOpenSSL = "*"
+
+[[package]]
+name = "types-tzlocal"
+version = "5.1.0.1"
+description = "Typing stubs for tzlocal"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "types-tzlocal-5.1.0.1.tar.gz", hash = "sha256:b84a115c0c68f0d0fa9af1c57f0645eeef0e539147806faf1f95ac3ac01ce47b"},
+    {file = "types_tzlocal-5.1.0.1-py3-none-any.whl", hash = "sha256:0302e8067c86936de8f7e0aaedc2cfbf240080802c603df0f80312fbd4efb926"},
+]
+
+[package.dependencies]
+types-pytz = "*"
 
 [[package]]
 name = "typing-extensions"
@@ -3000,4 +3025,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e2aee2eb8a4eea3f405c09c10b5a6acf7f1676d1ee198b487ab6aec760df2dd4"
+content-hash = "95aa555ca1c78ad1fd83ea8c7c16dc950955ec63f6b127f2e83db7f0942792d9"

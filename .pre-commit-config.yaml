@@ -36,6 +36,7 @@ repos:
         additional_dependencies:
           - "types-python-dateutil"
           - "types-redis"
+          - "types-tzlocal"
 
   - repo: https://github.com/python-poetry/poetry
     rev: "1.8.0"
