@@ -21,3 +21,4 @@ class RedisEvent(IntEnum):
     KEY_ADDED_TO_CACHE = 4
     KEY_FOUND_IN_CACHE = 5
     FAILED_TO_CACHE_KEY = 6
+    KEY_DELETED_FROM_CACHE = 7

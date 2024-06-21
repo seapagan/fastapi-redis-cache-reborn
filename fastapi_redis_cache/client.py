@@ -21,6 +21,8 @@ from fastapi_redis_cache.redis import redis_connect
 from fastapi_redis_cache.util import serialize_json
 
 if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import ByteString
+
     from fastapi import Request, Response
     from redis import client
 
@@ -159,7 +161,7 @@ class FastApiRedisCache(metaclass=MetaSingleton):
         if self.redis:
             self.redis.sadd(tag, key)
 
-    def get_tagged_keys(self, tag: str) -> set[str]:
+    def get_tagged_keys(self, tag: str) -> set[ByteString]:
         """Return a set of keys associated with a tag."""
         return self.redis.smembers(tag) if self.redis else set()
 
@@ -204,7 +206,9 @@ class FastApiRedisCache(metaclass=MetaSingleton):
             message = f"Object of type {type(value)} is not JSON-serializable"
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, msg=message, key=key)
             return False
+
         cached = self.redis.set(name=key, value=response_data, ex=expire)
+
         if not cached:
             self.log(RedisEvent.FAILED_TO_CACHE_KEY, key=key, value=value)
             return False

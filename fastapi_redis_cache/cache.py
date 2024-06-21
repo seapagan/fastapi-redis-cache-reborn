@@ -11,6 +11,7 @@ from typing import Any, Callable, Union
 from fastapi import Response
 
 from fastapi_redis_cache.client import FastApiRedisCache
+from fastapi_redis_cache.enums import RedisEvent
 from fastapi_redis_cache.util import (
     ONE_DAY_IN_SECONDS,
     ONE_HOUR_IN_SECONDS,
@@ -54,6 +55,7 @@ def cache(
             request = func_kwargs.pop("request", None)
             response = func_kwargs.pop("response", None)
             create_response_directly = not response
+
             if create_response_directly:
                 response = Response()
                 # below fix by @jaepetto on the original repo.
@@ -68,6 +70,7 @@ def cache(
                 # if the redis client is not connected or request is not
                 # cacheable, no caching behavior is performed.
                 return await get_api_response_async(func, *args, **kwargs)
+
             key = redis_cache.get_cache_key(tag, func, *args, **kwargs)
             ttl, in_cache = redis_cache.check_cache(key)
             if in_cache:
@@ -121,6 +124,81 @@ def cache(
                     else response_data
                 )
             return response_data
+
+        return inner_wrapper
+
+    return outer_wrapper
+
+
+def expires(
+    tag: str | None = None,
+    arg: str | None = None,  # noqa: ARG001
+) -> Callable[..., Any]:
+    """Invalidate all cached responses with the same tag.
+
+    Args:
+        tag (str, optional): The tag to search for keys to expire.
+            Defaults to None.
+        arg: (str, optional): The function arguement to filter for expiry. This
+            would generally be the varying arguement suppplied to the route.
+            Defaults to None. If not specified, the kwargs for the route will
+            be used to search for the key to expire.
+    """
+
+    def outer_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        async def inner_wrapper(
+            *args: Any,  # noqa: ANN401
+            **kwargs: Any,  # noqa: ANN401
+        ) -> Any:  # noqa: ANN401
+            """Invalidate all cached responses with the same tag."""
+            response = kwargs.get("response", None)
+            create_response_directly = not response
+
+            if create_response_directly:
+                response = Response()
+                if "content-length" in response.headers:
+                    del response.headers["content-length"]
+
+            redis_cache = FastApiRedisCache()
+            orig_response = await get_api_response_async(func, *args, **kwargs)
+
+            ignore_args = redis_cache.ignore_arg_types
+
+            if redis_cache.redis and redis_cache.connected and tag and kwargs:
+                # remove any args that should not be used to generate the cache
+                # key.
+                filtered_kwargs = kwargs.copy()
+                for key in list(filtered_kwargs.keys()):
+                    if type(filtered_kwargs[key]) in ignore_args:
+                        del filtered_kwargs[key]
+                # create the search string to find the keys to expire.
+                search = "".join(
+                    [
+                        f"({key}={value})"
+                        for key, value in filtered_kwargs.items()
+                    ]
+                )
+                tag_keys = redis_cache.get_tagged_keys(tag)
+                found_keys = [key for key in tag_keys if search.encode() in key]
+                for this_key in found_keys:
+                    key_str = (
+                        this_key.decode()
+                        if isinstance(this_key, bytes)
+                        else this_key
+                    )
+
+                    redis_cache.log(
+                        RedisEvent.KEY_DELETED_FROM_CACHE, key=str(key_str)
+                    )
+                    redis_cache.redis.delete(key_str)
+                    redis_cache.redis.srem(tag, key_str)
+
+            return Response(
+                content=serialize_json(orig_response),
+                media_type=JSON_MEDIA_TYPE,
+                headers=response.headers,
+            )
 
         return inner_wrapper
 
