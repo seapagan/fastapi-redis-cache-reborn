@@ -6,6 +6,34 @@ project since the first release, with the latest changes at the top.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.1](https://github.com/seapagan/fastapi-redis-cache-reborn/releases/tag/0.3.1) (June 21, 2024)
+
+**Closed Issues**
+
+- Bug when trying to create FastApiRedisCache() object ([#94](https://github.com/seapagan/fastapi-redis-cache-reborn/issues/94)) by [seapagan](https://github.com/seapagan)
+
+**Bug Fixes**
+
+- Modify the way the local TZ is detected ([#100](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/100)) by [seapagan](https://github.com/seapagan)
+
+**Documentation**
+
+- Add a basic documentation site ([#84](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/84)) by [seapagan](https://github.com/seapagan)
+
+**Dependency Updates**
+
+- Bump urllib3 from 2.2.1 to 2.2.2 ([#99](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/99)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump mkdocs-material from 9.5.25 to 9.5.27 ([#98](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/98)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump redis from 5.0.4 to 5.0.6 ([#97](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/97)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump ruff from 0.4.7 to 0.4.9 ([#96](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/96)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump pydantic from 2.7.1 to 2.7.4 ([#95](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/95)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump faker from 25.4.0 to 25.8.0 ([#92](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/92)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump pytest-asyncio from 0.21.1 to 0.23.7 ([#90](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/90)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump pytest from 8.2.1 to 8.2.2 ([#89](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/89)) by [dependabot[bot]](https://github.com/apps/dependabot)
+- Bump pygments from 2.17.2 to 2.18.0 ([#88](https://github.com/seapagan/fastapi-redis-cache-reborn/pull/88)) by [dependabot[bot]](https://github.com/apps/dependabot)
+
+[`Full Changelog`](https://github.com/seapagan/fastapi-redis-cache-reborn/compare/0.3.0...0.3.1) | [`Diff`](https://github.com/seapagan/fastapi-redis-cache-reborn/compare/0.3.0...0.3.1.diff) | [`Patch`](https://github.com/seapagan/fastapi-redis-cache-reborn/compare/0.3.0...0.3.1.patch)
+
 ## [0.3.0](https://github.com/seapagan/fastapi-redis-cache-reborn/releases/tag/0.3.0) (June 04, 2024)
 
 **_'It's Alive!!!!'_**

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-redis-cache-reborn"
-version = "0.3.0"
+version = "0.3.1"
 description = "A simple and robust caching solution for FastAPI endpoints using Redis."
 authors = ["Grant Ramsay <seapagan@gmail.com>"]
 license = "MIT"
