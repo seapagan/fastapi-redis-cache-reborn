@@ -45,7 +45,7 @@ ruff = "^0.4.2"
 pymarkdownlnt = "^0.9.17"
 
 # task runner
-poethepoet = ">=0.25.1,<0.27.0"
+poethepoet = ">=0.27.0,<0.28.0"
 
 # testing
 requests = "^2.31.0"
