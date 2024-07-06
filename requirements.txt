@@ -1,7 +1,7 @@
 annotated-types==0.7.0 ; python_version >= "3.9" and python_version < "4.0"
 anyio==4.4.0 ; python_version >= "3.9" and python_version < "4.0"
 async-timeout==4.0.3 ; python_version >= "3.9" and python_full_version < "3.11.3"
-certifi==2024.6.2 ; python_version >= "3.9" and python_version < "4.0"
+certifi==2024.7.4 ; python_version >= "3.9" and python_version < "4.0"
 click==8.1.7 ; python_version >= "3.9" and python_version < "4.0"
 colorama==0.4.6 ; python_version >= "3.9" and python_version < "4.0" and (sys_platform == "win32" or platform_system == "Windows")
 dnspython==2.6.1 ; python_version >= "3.9" and python_version < "4.0"
