@@ -41,7 +41,7 @@ tzlocal = "^5.2"
 # linting etc
 mypy = "^1.10.0"
 pre-commit = "^3.7.0"
-ruff = "^0.4.2"
+ruff = ">=0.4.2,<0.7.0"
 pymarkdownlnt = "^0.9.17"
 
 # task runner
