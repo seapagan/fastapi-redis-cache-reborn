@@ -48,6 +48,7 @@ from sqlalchemy.orm import Session
 
 REDIS_SERVER_URL = "redis://127.0.0.1:6379"
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis_cache = FastApiRedisCache()
@@ -55,11 +56,12 @@ async def lifespan(app: FastAPI):
         host_url=os.environ.get("REDIS_URL", REDIS_SERVER_URL),
         prefix="myapi-cache",
         response_header="X-MyAPI-Cache",
-        ignore_arg_types=[Request, Response, Session]
+        ignore_arg_types=[Request, Response, Session],
     )
     yield
 
-app = FastAPI(title="FastAPI Redis Cache Example",lifespan=lifespan)
+
+app = FastAPI(title="FastAPI Redis Cache Example", lifespan=lifespan)
 
 # routes and more code
 ```
@@ -97,7 +99,11 @@ correct way to mark data that "never expires".
 # WILL NOT be cached
 @app.get("/data_no_cache")
 def get_data():
-    return {"success": True, "message": "this data is not cacheable, for... you know, reasons"}
+    return {
+        "success": True,
+        "message": "this data is not cacheable, for... you know, reasons",
+    }
+
 
 # Will be cached for one year
 @app.get("/immutable_data")
@@ -135,7 +141,10 @@ seconds before data is deleted:
 @app.get("/dynamic_data")
 @cache(expire=30)
 def get_dynamic_data(request: Request, response: Response):
-    return {"success": True, "message": "this data should only be cached temporarily"}
+    return {
+        "success": True,
+        "message": "this data should only be cached temporarily",
+    }
 ```
 
 !!! note
@@ -212,10 +221,14 @@ For example, instead of `@cache(expire=timedelta(days=1))`, you could use:
 ```python
 from fastapi_redis_cache import cache_one_day
 
+
 @app.get("/cache_one_day")
 @cache_one_day()
 def partial_cache_one_day(response: Response):
-    return {"success": True, "message": "this data should be cached for 24 hours"}
+    return {
+        "success": True,
+        "message": "this data should be cached for 24 hours",
+    }
 ```
 
 If a duration that you would like to use throughout your project is missing from
@@ -238,7 +251,10 @@ path functions:
 @app.get("/cache_two_hours")
 @cache_two_hours()
 def partial_cache_two_hours(response: Response):
-    return {"success": True, "message": "this data should be cached for two hours"}
+    return {
+        "success": True,
+        "message": "this data should be cached for two hours",
+    }
 ```
 
 ## Cache Keys
@@ -352,7 +368,9 @@ for `MLBGameDate` is given below:
 class MLBGameDate:
     def __init__(
         self,
-        game_date: str = Query(..., description="Date as a string in YYYYMMDD format"),
+        game_date: str = Query(
+            ..., description="Date as a string in YYYYMMDD format"
+        ),
         db: Session = Depends(get_db),
     ):
         try:
